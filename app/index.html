@@ -144,6 +144,26 @@
   .dsp{flex:1}.dsep{width:1px;height:22px;background:#24395A;margin:0 4px;flex:none}
   #dtop a{display:flex;gap:8px;align-items:center;font-weight:800;color:inherit;text-decoration:none;margin-right:6px}#dtop img{width:24px;border-radius:6px}
   #ddate{min-width:88px;text-align:center;font-variant-numeric:tabular-nums;color:#8CA0BA}
+
+  body.dark{--bg:#0F1B2D;--panel:#13233A;--line:#24395A;--fg:#E8EEF6;--muted:#8CA0BA}
+  body.dark #charts{background:#0F1B2D}body.dark .hud{color:#E8EEF6}
+  #xh{display:none;position:fixed;inset:0;pointer-events:none;z-index:35}body.desk #xh{display:block}
+  body.desk #selbar{display:none!important}
+  #drail .dsp{flex:1}
+  #dfly{position:fixed;left:52px;z-index:50;background:#13233A;border:1px solid #24395A;border-radius:10px;padding:6px;min-width:190px;box-shadow:0 8px 30px #0008}
+  #dfly button{display:block;width:100%;text-align:left;background:none;border:0;color:#E8EEF6;padding:8px 10px;border-radius:6px;font:13px system-ui;cursor:pointer}#dfly button:hover{background:#1b3358}
+  #dfly i{font-style:normal;color:#8CA0BA;font-size:12px;padding:2px 10px;display:block}
+  #dprop{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:45;display:flex;gap:6px;align-items:center;background:#13233A;color:#E8EEF6;border:1px solid #24395A;border-radius:12px;padding:6px 10px;box-shadow:0 8px 30px #0008;font:13px system-ui}
+  #dprop[hidden],#dfly[hidden],#ddlg[hidden]{display:none}
+  #dprop input[type=color]{width:34px;height:28px;border:0;background:none;padding:0}
+  #dprop select,#dprop button{background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:5px 8px;font:inherit;cursor:pointer}
+  #ddlg{position:fixed;inset:0;z-index:60;background:#0008;display:flex;align-items:center;justify-content:center}
+  .dbox{width:min(420px,94vw);max-height:84vh;overflow:auto;background:#13233A;color:#E8EEF6;border:1px solid #24395A;border-radius:14px;font:14px system-ui}
+  .dhd{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;font-size:16px}.dhd button{background:none;border:0;color:inherit;font-size:16px;cursor:pointer}
+  .dtabs{display:flex;gap:4px;padding:0 12px;border-bottom:1px solid #24395A}.dtabs button{background:none;border:0;color:#8CA0BA;padding:8px 12px;cursor:pointer;font:inherit}.dtabs .on{color:#F5B642;border-bottom:2px solid #F5B642}
+  .dbody{padding:12px 16px 18px}.drow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:7px 0}
+  .drow input[type=text],.drow input[type=number],.drow select{background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:6px 8px;width:140px;font:inherit}
+  .drow input[type=color]{width:44px;height:30px;border:0;background:none}.lv{display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:flex-end;max-width:210px}
 </style>
 </head>
 <body>
@@ -197,7 +217,12 @@ const DATA_BASE = (() => {
   if (q) return q.endsWith("/") ? q : q + "/";
   return "https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/";
 })();
-const VER = "4.4.0";
+const VER = "4.5.0";
+const THEMES = { classic: { w: "#fff", k: "#000", up: "#fff", dn: "#000", bd: 1, pc: "#1a5fb4" }, modern: { w: "#0F1B2D", k: "#9FB0C7", up: "#2EC4A6", dn: "#F0707A", bd: 0, pc: "#5AA9FF" }, blind: { w: "#0F1B2D", k: "#9FB0C7", up: "#3B9CFF", dn: "#FF9F1C", bd: 0, pc: "#F5B642" } };
+let SKIN = (function () { try { return localStorage.getItem("bbb_skin"); } catch (e) { return null; } })() || (matchMedia("(pointer:fine)").matches && innerWidth >= 900 ? "modern" : "classic");
+if (!THEMES[SKIN]) SKIN = "classic";
+let TH = THEMES[SKIN], DHIDE = false, DLOCK = false;
+const DASH = { 1: [6, 4], 2: [1.5, 3.5] };
 
 // ---------- constants ----------
 const TFS = [5, 15, 45, 60, 1440];
@@ -605,7 +630,7 @@ function drawPanel(p) {
   if (p.W < 20 || p.H < 20) return;
   const ctx = p.ctx, tf = p.tf;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, p.W, p.H);
+  ctx.fillStyle = TH.w; ctx.fillRect(0, 0, p.W, p.H);
   const arr = bars[tf]; if (!arr || !arr.length) { p.map = null; return; }
   const pw = p.W - AXIS_W, ph = p.H - AXIS_H, phc = ph;
   const n = arr.length, nv = p.visMap[tf], slot = pw / (nv + PAD), off = p.off;
@@ -622,7 +647,7 @@ function drawPanel(p) {
 
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, pw, ph); ctx.clip();
   // day separators (dashed)
-  ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = TH.k; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
   if (tf !== 1440) for (let i = i0; i <= i1; i++) {
     if (i > 0 && arr[i].d !== arr[i - 1].d) {
       const x = Math.round(xc(i) - slot / 2) + 0.5;
@@ -634,13 +659,13 @@ function drawPanel(p) {
   const bw = Math.max(1, Math.min(slot * 0.7, 22));
   for (let i = i0; i <= i1; i++) {
     const b = arr[i], x = Math.round(xc(i)), up = b.c >= b.o;
-    ctx.strokeStyle = "#000"; ctx.lineWidth = 1;
+    ctx.strokeStyle = TH.bd ? TH.k : (up ? TH.up : TH.dn); ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x + 0.5, y(b.h)); ctx.lineTo(x + 0.5, y(b.l)); ctx.stroke();
     const yo = y(b.o), yc = y(b.c), top = Math.round(Math.min(yo, yc)), hgt = Math.max(1, Math.round(Math.abs(yo - yc)));
     const w = Math.max(1, Math.round(bw)), lx = Math.round(x + 0.5 - w / 2);
-    ctx.fillStyle = up ? "#fff" : "#000";
+    ctx.fillStyle = up ? TH.up : TH.dn;
     ctx.fillRect(lx, top, w, hgt);
-    ctx.strokeRect(lx + 0.5, top + 0.5, Math.max(0, w - 1), Math.max(0, hgt - 1));
+    ctx.strokeStyle = TH.bd ? TH.k : (up ? TH.up : TH.dn); ctx.strokeRect(lx + 0.5, top + 0.5, Math.max(0, w - 1), Math.max(0, hgt - 1));
   }
   // bar numbers (5-minute chart only): 1, 3, 6, 9, 12 ... counted from the open of each day, just below the bar
   if (S.nums && tf === 5) {
@@ -678,7 +703,7 @@ function drawPanel(p) {
   // price axis
   ctx.font = "11px system-ui,sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
   const step = niceStep(hi - lo, Math.max(3, phc / 46));
-  ctx.fillStyle = "#000"; ctx.strokeStyle = "#000"; ctx.lineWidth = 1;
+  ctx.fillStyle = TH.k; ctx.strokeStyle = TH.k; ctx.lineWidth = 1;
   for (let pr = Math.ceil(lo / step) * step; pr < hi; pr += step) {
     const yy = Math.round(y(pr)) + 0.5;
     ctx.beginPath(); ctx.moveTo(pw, yy); ctx.lineTo(pw + 4, yy); ctx.stroke();
@@ -687,10 +712,10 @@ function drawPanel(p) {
   if (lastPrice != null) {
     const yy = Math.round(y(lastPrice)) + 0.5;
     ctx.fillStyle = "#222"; ctx.fillRect(pw + 1, yy - 9, AXIS_W - 1, 18);
-    ctx.fillStyle = "#fff"; ctx.fillText(lastPrice.toFixed(2), pw + 6, yy);
+    ctx.fillStyle = TH.w; ctx.fillText(lastPrice.toFixed(2), pw + 6, yy);
   }
   // time axis
-  ctx.fillStyle = "#000"; ctx.textAlign = "center"; ctx.strokeStyle = "#000";
+  ctx.fillStyle = TH.k; ctx.textAlign = "center"; ctx.strokeStyle = TH.k;
   let lastX = -1e9;
   const labW = tf === 1440 ? 72 : 108;
   let SS = 405; for (const m of NICE_MIN) if (m % tf === 0 && (m / tf) * slot >= labW) { SS = m; break; }
@@ -705,7 +730,7 @@ function drawPanel(p) {
     lastX = x;
   }
   // frame
-  ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.strokeRect(0.5, 0.5, pw, ph);
+  ctx.strokeStyle = TH.k; ctx.lineWidth = 1; ctx.strokeRect(0.5, 0.5, pw, ph);
   // cross labels on the axes
   if (cross && cross.panel === p) drawCrossAxis(p, ctx, pw, ph);
 }
@@ -749,44 +774,54 @@ function chPrice2(o) {           // channel: parallel line through the third poi
   const slope = (b.p - a.p) / (tb - ta);
   return c.p - (a.p + slope * (tc - ta));      // vertical offset of the second line
 }
+function ends(o, P, pw) {
+  const st = o.st || {}, dx = P[1].x - P[0].x, dy = P[1].y - P[0].y; let x0 = P[0].x, y0 = P[0].y, x1 = P[1].x, y1 = P[1].y;
+  const at = x => P[0].y + dy * (x - P[0].x) / (dx || 1e-9);
+  if (dx !== 0 && (o.kind === "ray" || st.extR)) { x1 = dx > 0 ? pw : 0; y1 = at(x1); }
+  if (dx !== 0 && st.extL) { x0 = dx > 0 ? 0 : pw; y0 = at(x0); }
+  return [x0, y0, x1, y1];
+}
 function drawObj(p, ctx, o, sel) {
   if (!p.map) return;
   const pw = p.map.pw;
   const P = objPix(p, o); if (P.some(v => v === null)) return;
-  ctx.save(); ctx.strokeStyle = PCOL; ctx.fillStyle = PCOL; ctx.lineWidth = 1.4; ctx.setLineDash([]);
+  if (DHIDE) return;
+  const st = o.st || {}, col = st.col || TH.pc;
+  ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = st.fcol || col; ctx.lineWidth = st.w || 1.4; ctx.setLineDash(DASH[st.dash] || []);
   if (o.kind === "h") {
     const yy = P[0].y; ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(pw, yy); ctx.stroke();
-    ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText(o.pts[0].p.toFixed(2), 4, yy - 2);
-  } else if (o.kind === "tl") {
-    ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke();
-  } else if (o.kind === "ray" || o.kind === "arrow") {
-    let ex = P[1].x, ey = P[1].y;
-    if (o.kind === "ray") { const dx = P[1].x - P[0].x, dy = P[1].y - P[0].y; if (dx > 0) { ex = pw; ey = P[0].y + dy * (pw - P[0].x) / dx; } }
-    ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(ex, ey); ctx.stroke();
-    if (o.kind === "arrow") { const a = Math.atan2(P[1].y - P[0].y, P[1].x - P[0].x); ctx.beginPath(); ctx.moveTo(P[1].x, P[1].y); ctx.lineTo(P[1].x - 11 * Math.cos(a - .4), P[1].y - 11 * Math.sin(a - .4)); ctx.lineTo(P[1].x - 11 * Math.cos(a + .4), P[1].y - 11 * Math.sin(a + .4)); ctx.closePath(); ctx.fill(); }
+    ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "bottom"; if (st.lab !== 0) ctx.fillText(o.pts[0].p.toFixed(2), 4, yy - 2);
+  } else if (o.kind === "tl" || o.kind === "ray" || o.kind === "arrow") {
+    const E = ends(o, P, pw); ctx.beginPath(); ctx.moveTo(E[0], E[1]); ctx.lineTo(E[2], E[3]); ctx.stroke();
+    if (o.kind === "arrow" || st.arr) { const a = Math.atan2(P[1].y - P[0].y, P[1].x - P[0].x); ctx.beginPath(); ctx.moveTo(P[1].x, P[1].y); ctx.lineTo(P[1].x - 11 * Math.cos(a - .4), P[1].y - 11 * Math.sin(a - .4)); ctx.lineTo(P[1].x - 11 * Math.cos(a + .4), P[1].y - 11 * Math.sin(a + .4)); ctx.closePath(); ctx.fill(); }
   } else if (o.kind === "vl") {
-    ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(P[0].x, 0); ctx.lineTo(P[0].x, p.map.ph); ctx.stroke();
+    if (!st.dash) ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(P[0].x, 0); ctx.lineTo(P[0].x, p.map.ph); ctx.stroke();
+  } else if (o.kind === "cl") {
+    ctx.beginPath(); ctx.moveTo(P[0].x, 0); ctx.lineTo(P[0].x, p.map.ph); ctx.moveTo(0, P[0].y); ctx.lineTo(pw, P[0].y); ctx.stroke();
+  } else if (o.kind === "hr") {
+    ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(pw, P[0].y); ctx.stroke(); ctx.beginPath(); ctx.arc(P[0].x, P[0].y, 3, 0, 6.3); ctx.fill();
   } else if (o.kind === "txt") {
-    ctx.font = "600 13px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(o.text || "", P[0].x + 7, P[0].y);
+    ctx.font = (st.b === 0 ? "400 " : "600 ") + (st.sz || 13) + "px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(o.text || "", P[0].x + 7, P[0].y);
     ctx.beginPath(); ctx.arc(P[0].x, P[0].y, 3, 0, 6.3); ctx.fill();
-  } else if (o.kind === "rect") {
+  } else if (o.kind === "rect" || o.kind === "ell") {
     const x = Math.min(P[0].x, P[1].x), yy = Math.min(P[0].y, P[1].y), w = Math.abs(P[1].x - P[0].x), h = Math.abs(P[1].y - P[0].y);
-    ctx.globalAlpha = 0.12; ctx.fillRect(x, yy, w, h); ctx.globalAlpha = 1; ctx.strokeRect(x, yy, w, h);
+    ctx.globalAlpha = st.op ?? 0.12; if (o.kind === "ell") { ctx.beginPath(); ctx.ellipse(x + w / 2, yy + h / 2, w / 2, h / 2, 0, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; ctx.stroke(); } else { ctx.fillRect(x, yy, w, h); ctx.globalAlpha = 1; ctx.strokeRect(x, yy, w, h); }
   } else if (o.kind === "ch") {
     ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke();
     if (o.pts.length > 2) {
       const dy = yOfP(p, o.pts[0].p + chPrice2(o)) - P[0].y;
       ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y + dy); ctx.lineTo(P[1].x, P[1].y + dy); ctx.stroke();
-      ctx.globalAlpha = 0.07; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[1].x, P[1].y + dy); ctx.lineTo(P[0].x, P[0].y + dy); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.globalAlpha = st.op ?? 0.07; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[1].x, P[1].y + dy); ctx.lineTo(P[0].x, P[0].y + dy); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
       ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y + dy / 2); ctx.lineTo(P[1].x, P[1].y + dy / 2); ctx.stroke();
     }
   } else if (o.kind === "fib") {
-    const a = o.pts[0].p, b = o.pts[1].p, xl = Math.min(P[0].x, P[1].x), xr = Math.max(P[0].x, P[1].x);
-    ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke(); ctx.setLineDash([]);
-    for (const f of FIB) {
+    const a = o.pts[0].p, b = o.pts[1].p, xl = Math.min(P[0].x, P[1].x), xr = st.extR ? pw : Math.max(P[0].x, P[1].x);
+    ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke(); ctx.setLineDash(DASH[st.dash] || []);
+    for (const f of (st.lv || FIB)) {
       const pr = b - (b - a) * f, yy = yOfP(p, pr);
       ctx.globalAlpha = f === 0 || f === 1 ? 0.9 : 0.6;
       ctx.beginPath(); ctx.moveTo(xl, yy); ctx.lineTo(Math.max(xr, xl + 40), yy); ctx.stroke(); ctx.globalAlpha = 1;
+      if (st.lab) { ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText(f + " (" + pr.toFixed(2) + ")", xl + 3, yy - 1); }
     }
   } else if (o.kind === "fx") {
     const A = o.pts[0], B = o.pts[1], dP = B.p - A.p;
@@ -817,7 +852,7 @@ function segDist(px, py, ax, ay, bx, by) {
 }
 // hit test: returns {o, handle} where handle is a point index or 'body'
 function drawHit(p, x, y) {
-  if (!p.map) return null;
+  if (!p.map || DLOCK) return null;
   const tolH = 15, tolB = 11;
   for (let k = drawings.length - 1; k >= 0; k--) {
     const o = drawings[k], P = objPix(p, o); if (P.some(v => v === null)) continue;
@@ -827,11 +862,12 @@ function drawHit(p, x, y) {
     }
     let d = 1e9;
     if (o.kind === "h") d = Math.abs(P[0].y - y);
-    else if (o.kind === "tl" || o.kind === "arrow") d = segDist(x, y, P[0].x, P[0].y, P[1].x, P[1].y);
-    else if (o.kind === "ray") { const dx = P[1].x - P[0].x, ex = Math.max(P[1].x, p.map.pw); d = segDist(x, y, P[0].x, P[0].y, ex, dx > 0 ? P[0].y + (P[1].y - P[0].y) * (ex - P[0].x) / dx : P[1].y); }
+    else if (o.kind === "tl" || o.kind === "arrow" || o.kind === "ray") { const E = ends(o, P, p.map.pw); d = segDist(x, y, E[0], E[1], E[2], E[3]); }
     else if (o.kind === "vl") d = Math.abs(P[0].x - x);
+    else if (o.kind === "cl") d = Math.min(Math.abs(P[0].x - x), Math.abs(P[0].y - y));
+    else if (o.kind === "hr") d = x >= P[0].x - 6 ? Math.abs(P[0].y - y) : 1e9;
     else if (o.kind === "txt") d = Math.max(0, Math.hypot(P[0].x + 28 - x, P[0].y - y) - 24);
-    else if (o.kind === "rect") {
+    else if (o.kind === "rect" || o.kind === "ell") {
       const x0 = Math.min(P[0].x, P[1].x), x1 = Math.max(P[0].x, P[1].x), y0 = Math.min(P[0].y, P[1].y), y1 = Math.max(P[0].y, P[1].y);
       d = Math.min(segDist(x, y, x0, y0, x1, y0), segDist(x, y, x1, y0, x1, y1), segDist(x, y, x1, y1, x0, y1), segDist(x, y, x0, y1, x0, y0));
     } else if (o.kind === "ch") {
@@ -909,7 +945,7 @@ const ptrs = new Map();
 let G = null;           // the one-finger gesture in progress
 let pinch = null;
 
-const TOOL_HINT = { ray: "Ray: press, drag, release", arrow: "Arrow: press, drag, release", vl: "Vertical line: tap a bar", txt: "Text: tap where it goes",
+const TOOL_HINT = { cl: "Cross line: tap a point", hr: "Horizontal ray: tap a point", ell: "Ellipse: press, drag, release", ray: "Ray: press, drag, release", arrow: "Arrow: press, drag, release", vl: "Vertical line: tap a bar", txt: "Text: tap where it goes",
   cross: "Measure: press and drag on the chart",
   h: "Tap the chart to place a horizontal line",
   tl: "Trend line: drag from the start to the end",
@@ -959,13 +995,13 @@ function onDown(p, e) {
     cross = { panel: p, x: xOfT(p, m.T), y: yOfP(p, m.p), snapped: m.snapped, a: { T: m.T, p: m.p }, b: { T: m.T, p: m.p } };
     G.k = "cross"; return;
   }
-  if (tool === "vl" || tool === "txt") {
+  if (tool === "vl" || tool === "txt" || tool === "cl" || tool === "hr") {
     const m = magnetPoint(p, pt.x, pt.y), o = { kind: tool, pts: [ptOf(m)] };
     if (tool === "txt") { const t = prompt("Text:"); if (!t) { setTool(null); G = null; return; } o.text = t; }
     addDrawing(o); setTool(null); G = null; return;
   }
   if (tool === "h") { const pr = pOfY(p, pt.y); addDrawing({ kind: "h", pts: [{ date: days[dayIdx].date, ms: 0, p: pr }] }); setTool(null); G = null; return; }
-  if (tool === "tl" || tool === "ray" || tool === "arrow" || tool === "rect" || tool === "fib" || tool === "ch" || tool === "fx") {
+  if (tool === "tl" || tool === "ray" || tool === "arrow" || tool === "ell" || tool === "rect" || tool === "fib" || tool === "ch" || tool === "fx") {
     if ((tool === "ch" || tool === "fx") && pend && pend.stage === 2) { G.k = "chw"; setChannelThird(p, pt.x, pt.y); return; }
     const m = magnetPoint(p, pt.x, pt.y);
     pend = { kind: tool, stage: 1, obj: { id: "tmp", kind: tool, pts: [ptOf(m), ptOf(m)] } };
@@ -1750,30 +1786,111 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   get live() { return live; }, get drawings() { return drawings; }, get refs() { return refs; }, get lastPrice() { return lastPrice; }, S, days: () => days, get ready() { return days.length > 0 && !busy && !!bars[5]; },
   setMainTf, statsOf, placeDraft, newDraft, openCard, exitTrade, get tool() { return tool; }, extendHistory, get histN() { return histN; }, xOfT, yOfP, pOfY, tOfX };
 
-// ---------- website desk layout: top bar + tool rail (wide screens with a mouse; the phone keeps the movable menu) ----------
+// ---------- website desk layout v2: top bar, grouped tool rail, cursor, properties ----------
 (function () {
-  const top = document.createElement("div"), rail = document.createElement("div"); top.id = "dtop"; rail.id = "drail"; document.body.append(top, rail);
-  const B = (t, title, f, cls) => { const b = document.createElement("button"); b.innerHTML = t; b.title = title; b.className = cls || ""; b.onclick = f; return b; };
-  const sep = () => { const d = document.createElement("span"); d.className = "dsep"; return d; };
-  const a = document.createElement("a"); a.href = "../"; a.title = "Back to the website"; a.innerHTML = '<img src="icon-192.png" alt="">BarByBar'; top.append(a, sep());
-  top.append(B("◀", "Previous day", () => goDay(dayIdx - 1)));
-  const dl = document.createElement("span"); dl.id = "ddate"; top.append(dl);
-  top.append(B("▶", "Next day", () => goDay(dayIdx + 1)), B("🎲", "Random day", () => goDay(1 + Math.floor(Math.random() * Math.max(1, days.length - 1)))), B("📅", "Pick a date", pickDate), B("⟲", "Restart the day", () => goDay(dayIdx)), sep());
+  const E = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+  const redraw = () => { for (const p of panels) drawPanel(p); };
+  const setSkin = k => { SKIN = k; TH = THEMES[k]; document.body.classList.toggle("dark", k !== "classic"); try { localStorage.setItem("bbb_skin", k); } catch (e) { /* ignore */ } redraw(); };
+  document.body.classList.toggle("dark", SKIN !== "classic");
+  const top = E("div"), rail = E("div"); top.id = "dtop"; rail.id = "drail"; document.body.append(top, rail);
+  const B = (t, title, f, cls) => { const b = E("button", cls || "", t); b.title = title; b.onclick = f; return b; };
+  const sep = () => E("span", "dsep");
+  const a = E("a", "", '<img src="icon-192.png" alt="">BarByBar'); a.href = "../"; a.title = "Back to the website"; top.append(a, sep());
+  const dl = E("span"); dl.id = "ddate";
+  top.append(B("◀", "Previous day", () => goDay(dayIdx - 1)), dl, B("▶", "Next day", () => goDay(dayIdx + 1)), B("🎲", "Random day", () => goDay(1 + Math.floor(Math.random() * Math.max(1, days.length - 1)))), B("📅", "Pick a date", pickDate), B("⟲", "Restart the day", () => goDay(dayIdx)), sep());
   const tfs = TFS.map(t => { const b = B(TF_LABEL[t], "Timeframe " + TF_LABEL[t], () => setMainTf(t)); b._t = t; top.append(b); return b; }); top.append(sep());
-  const pl = B("▶ Play", "Play / pause", togglePlay), nx = B("⏭ Next bar", "Close this bar and go to the next", nextBar); top.append(pl, nx);
-  const sp = document.createElement("select"); sp.title = "Speed"; [1, 5, 10, 30, 60, 150, 400].forEach(v => sp.add(new Option(v + "x", v))); sp.onchange = () => { speed = +sp.value; S.speed = speed; saveSettings(); }; top.append(sp);
-  const sd = document.createElement("span"); sd.className = "dsp"; top.append(sd);
+  const pl = B("▶ Play", "Play / pause", togglePlay); top.append(pl, B("⏭ Next bar", "Close this bar and go to the next", nextBar));
+  const sp = E("select"); sp.title = "Speed"; [1, 5, 10, 30, 60, 150, 400].forEach(v => sp.add(new Option(v + "x", v))); sp.onchange = () => { speed = +sp.value; S.speed = speed; saveSettings(); }; top.append(sp, E("span", "dsp"));
   const TG = [["nums", "Bar no.", "Bar numbers (5m)"], ["refs", "Prior lines", "Prior day, week and month lines"], ["multi", "3 charts", "Three-chart layout"], ["showHist", "History", "Trade history marks"], ["showLines", "Trade lines", "Live trade lines"], ["ruleCheck", "Rules", "Rule check on each trade"]];
   const tgs = TG.map(([k, t, ti]) => { const b = B(t, ti, () => { S[k] = !S[k]; saveSettings(); syncUI(); if (k === "multi") for (const p of panels) p.off = 0; }); b._k = k; top.append(b); return b; });
-  top.append(sep(), B("📈 Trade", "Open a trade", () => openTradeCard(), "acc"), B("📒 Journal", "Trade journal and stats", openReport), B("⛶", "Full screen", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()));
-  const TL = [["✛", "Measure", "cross"], ["─", "Horizontal line", "h"], ["│", "Vertical line", "vl"], ["╱", "Trend line", "tl"], ["➚", "Ray", "ray"], ["➔", "Arrow", "arrow"], ["▭", "Box", "rect"], ["⫽", "Channel", "ch"], ["≣", "Fibonacci", "fib"], ["⇅", "Measured move", "fx"], ["T", "Text", "txt"]];
-  const tb = TL.map(([ic, ti, k]) => { const b = B(ic, ti, () => setTool(k)); b._k = k; rail.append(b); return b; });
-  rail.append(B("🧹", "Delete all drawings", () => { if (confirm("Delete all drawings?")) { drawings = []; selDraw = null; showSelbar(); saveDrawings(); } }));
+  const ls = E("select"); ls.title = "Chart look"; [["classic", "Classic"], ["modern", "Modern"], ["blind", "Color-blind"]].forEach(([v, n]) => ls.add(new Option(n, v))); ls.value = SKIN; ls.onchange = () => setSkin(ls.value);
+  top.append(sep(), ls, B("📈 Trade", "Open a trade", () => openTradeCard(), "acc"), B("📒 Journal", "Trade journal and stats", openReport), B("⛶", "Full screen", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()));
+  // cursor overlay (crosshair / dot / arrow)
+  let CUR = "cross", last = null; const xh = E("canvas"); xh.id = "xh"; document.body.append(xh);
+  function xdraw(e) {
+    const c = xh.getContext("2d"), d = devicePixelRatio || 1;
+    if (xh.width !== innerWidth * d || xh.height !== innerHeight * d) { xh.width = innerWidth * d; xh.height = innerHeight * d; }
+    c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, innerWidth, innerHeight);
+    if (!e || CUR === "arrow" || !document.body.classList.contains("desk")) return;
+    for (const p of panels) {
+      if (!p.map) continue;
+      const r = p.cv.getBoundingClientRect(), m = p.map;
+      if (e.clientX < r.left || e.clientX > r.left + m.pw || e.clientY < r.top || e.clientY > r.top + m.ph) continue;
+      c.strokeStyle = TH.k; c.fillStyle = TH.k; c.lineWidth = 1;
+      if (CUR === "dot") { c.beginPath(); c.arc(e.clientX, e.clientY, 3, 0, 6.3); c.fill(); return; }
+      c.setLineDash([4, 4]); c.beginPath(); c.moveTo(e.clientX + .5, r.top); c.lineTo(e.clientX + .5, r.top + m.ph); c.moveTo(r.left, e.clientY + .5); c.lineTo(r.left + m.pw, e.clientY + .5); c.stroke(); c.setLineDash([]);
+      const pr = pOfY(p, e.clientY - r.top).toFixed(2), T = tOfX(p, e.clientX - r.left), di = Math.floor(T / SESSION_MS), dd = days[di];
+      const lab = dd ? fmtDayDate(dd.date) + (p.tf === 1440 ? "" : " " + fmtClock(T - di * SESSION_MS)) : "";
+      c.font = "11px system-ui,sans-serif"; c.textBaseline = "middle"; c.fillRect(r.left + m.pw, e.clientY - 9, AXIS_W, 18); c.fillStyle = TH.w; c.textAlign = "left"; c.fillText(pr, r.left + m.pw + 6, e.clientY);
+      if (lab) { const w = c.measureText(lab).width + 14; c.fillStyle = TH.k; c.fillRect(e.clientX - w / 2, r.top + m.ph + 1, w, AXIS_H - 2); c.fillStyle = TH.w; c.textAlign = "center"; c.fillText(lab, e.clientX, r.top + m.ph + AXIS_H / 2); }
+      return;
+    }
+  }
+  addEventListener("pointermove", e => { last = e; xdraw(e); }, { passive: true }); document.addEventListener("mouseleave", () => xdraw(null));
+  // left rail with flyouts
+  const GR = [["✛", "Cursor", [["Cross", "cur:cross"], ["Dot", "cur:dot"], ["Arrow", "cur:arrow"]]], ["╱", "Lines", [["Trend line", "tl"], ["Ray", "ray"], ["Arrow", "arrow"], ["Horizontal line", "h"], ["Horizontal ray", "hr"], ["Vertical line", "vl"], ["Cross line", "cl"]]], ["≣", "Fibonacci and projection", [["Fib retracement", "fib"], ["Measured move", "fx"]]], ["▭", "Shapes", [["Rectangle", "rect"], ["Ellipse", "ell"], ["Parallel channel", "ch"]]], ["T", "Text", [["Text", "txt"]]], ["📏", "Measure", [["Measure", "cross"]]]];
+  const fly = E("div"); fly.id = "dfly"; fly.hidden = true; document.body.append(fly);
+  const gb = GR.map(([ic, nm, it]) => {
+    const b = E("button", "", ic); b.title = nm; b._it = it;
+    b.onclick = e => { e.stopPropagation(); const r = b.getBoundingClientRect(); fly.style.top = r.top + "px"; fly.innerHTML = "<i>" + nm + "</i>";
+      it.forEach(([n, k]) => { const x = E("button", "", n); x.onclick = () => { fly.hidden = true; if (k.indexOf("cur:") === 0) { CUR = k.slice(4); setTool(null); xdraw(last); } else setTool(k); }; fly.append(x); }); fly.hidden = false; };
+    rail.append(b); return b;
+  });
+  document.addEventListener("click", () => { fly.hidden = true; });
+  rail.append(E("span", "dsp"));
+  const lk = B("🔓", "Lock all drawings", () => { DLOCK = !DLOCK; lk.textContent = DLOCK ? "🔒" : "🔓"; lk.classList.toggle("on", DLOCK); });
+  const hd = B("👁", "Hide all drawings", () => { DHIDE = !DHIDE; hd.classList.toggle("on", DHIDE); redraw(); });
+  rail.append(lk, hd, B("🗑", "Delete all drawings", () => { if (confirm("Delete all drawings?")) { drawings = []; selDraw = null; showSelbar(); saveDrawings(); redraw(); } }));
+  // properties
+  const NM = { h: "Horizontal line", vl: "Vertical line", tl: "Trend line", ray: "Ray", arrow: "Arrow", hr: "Horizontal ray", cl: "Cross line", rect: "Rectangle", ell: "Ellipse", ch: "Parallel channel", fib: "Fib retracement", fx: "Measured move", txt: "Text" };
+  const LN = [["col", "Line color", "color"], ["w", "Thickness", "w"], ["dash", "Line style", "dash"]];
+  const FL = LN.concat([["fcol", "Fill color", "color"], ["op", "Fill opacity", "op", 12]]);
+  const F = { h: LN.concat([["lab", "Show price label", "bool", 1]]), vl: LN, cl: LN, hr: LN, arrow: LN, fx: LN, tl: LN.concat([["extL", "Extend left", "bool", 0], ["extR", "Extend right", "bool", 0], ["arr", "Arrow at the end", "bool", 0]]), ray: LN.concat([["extL", "Extend left", "bool", 0]]), rect: FL, ell: FL, ch: LN.concat([["op", "Fill opacity", "op", 7]]), fib: LN.concat([["lab", "Show level values", "bool", 0], ["extR", "Extend right", "bool", 0], ["lv", "Levels", "lv"]]), txt: [["text", "Text", "text"], ["col", "Text color", "color"], ["sz", "Font size", "sz"], ["b", "Bold", "bool", 1]] };
+  const objSel = () => drawings.find(o => o.id === selDraw);
+  const setSt = (o, k, v) => { o.st = o.st || {}; o.st[k] = v; saveDrawings(); redraw(); };
+  function field(o, [k, lab, ty, d]) {
+    const st = o.st || {}, v = st[k], row = E("label", "drow", "<span>" + lab + "</span>"); let el;
+    if (ty === "color") { el = E("input"); el.type = "color"; el.value = v || (k === "fcol" ? st.col : null) || TH.pc; el.oninput = () => setSt(o, k, el.value); }
+    else if (ty === "w" || ty === "sz") { el = E("input"); el.type = "number"; el.min = 1; el.max = ty === "w" ? 8 : 48; el.step = ty === "w" ? .5 : 1; el.value = v || (ty === "w" ? 1.4 : 13); el.oninput = () => setSt(o, k, +el.value || 1); }
+    else if (ty === "dash") { el = E("select"); ["Solid", "Dashed", "Dotted"].forEach((n, i) => el.add(new Option(n, i))); el.value = v || 0; el.onchange = () => setSt(o, k, +el.value); }
+    else if (ty === "bool") { el = E("input"); el.type = "checkbox"; el.checked = !!(v == null ? d : v); el.onchange = () => setSt(o, k, el.checked ? 1 : 0); }
+    else if (ty === "op") { el = E("input"); el.type = "range"; el.min = 0; el.max = 100; el.value = v == null ? d : Math.round(v * 100); el.oninput = () => setSt(o, k, el.value / 100); }
+    else if (ty === "text") { el = E("input"); el.type = "text"; el.value = o.text || ""; el.oninput = () => { o.text = el.value; saveDrawings(); redraw(); }; }
+    else { el = E("span", "lv"); [0, .236, .382, .5, .618, .786, 1].forEach(L => { const c = E("label"), cb = E("input"); cb.type = "checkbox"; cb.checked = (st.lv || FIB).indexOf(L) >= 0; cb.onchange = () => { const cur = new Set((o.st && o.st.lv) || FIB); if (cb.checked) cur.add(L); else cur.delete(L); setSt(o, "lv", Array.from(cur).sort((x, y) => x - y)); }; c.append(cb, " " + L); el.append(c); }); }
+    row.append(el); return row;
+  }
+  const dlg = E("div"); dlg.id = "ddlg"; dlg.hidden = true; document.body.append(dlg); let tab = 0;
+  dlg.onclick = e => { if (e.target === dlg) dlg.hidden = true; };
+  function openDlg() {
+    const o = objSel(); if (!o) return; dlg.hidden = false; dlg.innerHTML = "";
+    const box = E("div", "dbox"), hh = E("div", "dhd", "<b>" + (NM[o.kind] || "Drawing") + "</b>"), tabs = E("div", "dtabs"), body = E("div", "dbody");
+    hh.append(B("✕", "Close", () => { dlg.hidden = true; }));
+    ["Style", "Coordinates"].forEach((n, i) => tabs.append(B(n, n, () => { tab = i; openDlg(); }, i === tab ? "on" : "")));
+    if (tab === 0) (F[o.kind] || LN).forEach(f => body.append(field(o, f)));
+    else o.pts.forEach((q, i) => { const r = E("label", "drow", "<span>Point " + (i + 1) + " price</span>"), el = E("input"); el.type = "number"; el.step = "0.25"; el.value = q.p.toFixed(2); el.oninput = () => { if (isFinite(+el.value)) { q.p = +el.value; saveDrawings(); redraw(); } }; r.append(el); body.append(r); });
+    box.append(hh, tabs, body); dlg.append(box);
+  }
+  const pr = E("div"); pr.id = "dprop"; pr.hidden = true; document.body.append(pr); let shown = null;
+  function props() {
+    const o = objSel();
+    if (!o || !document.body.classList.contains("desk")) { pr.hidden = true; shown = null; return; }
+    if (shown === o.id) return; shown = o.id; pr.hidden = false; pr.innerHTML = "";
+    const st = o.st || {}, col = E("input"), w = E("select"), ds = E("select");
+    col.type = "color"; col.title = "Color"; col.value = st.col || TH.pc; col.oninput = () => setSt(o, "col", col.value);
+    w.title = "Thickness"; [1, 2, 3, 4].forEach(n => w.add(new Option(n + " px", n))); w.value = Math.round(st.w || 1.4); w.onchange = () => setSt(o, "w", +w.value);
+    ds.title = "Line style"; ["Solid", "Dashed", "Dotted"].forEach((n, i) => ds.add(new Option(n, i))); ds.value = st.dash || 0; ds.onchange = () => setSt(o, "dash", +ds.value);
+    pr.append(E("b", "", NM[o.kind] || "Drawing"), col, w, ds,
+      B("⚙", "All settings", () => { tab = 0; openDlg(); }),
+      B("⧉", "Clone", () => { const c = JSON.parse(JSON.stringify(o)); c.pts.forEach(q => { q.p += 2; }); addDrawing(c); shown = null; }),
+      B("🗑", "Delete", () => { drawings = drawings.filter(d => d.id !== o.id); selDraw = null; showSelbar(); saveDrawings(); redraw(); shown = null; }));
+  }
   function upd() {
     const on = innerWidth >= 900 && matchMedia("(pointer:fine)").matches || /[?&]desk=1/.test(location.search);
-    document.body.classList.toggle("desk", on); if (!on) return;
+    document.body.classList.toggle("desk", on); if (!on) { props(); return; }
     dl.textContent = days[dayIdx] ? days[dayIdx].date : ""; pl.textContent = playing ? "⏸ Pause" : "▶ Play"; pl.classList.toggle("on", !!playing);
-    tfs.forEach(b => b.classList.toggle("on", main.tf === b._t)); tgs.forEach(b => b.classList.toggle("on", !!S[b._k])); tb.forEach(b => b.classList.toggle("on", tool === b._k)); sp.value = speed;
+    tfs.forEach(b => b.classList.toggle("on", main.tf === b._t)); tgs.forEach(b => b.classList.toggle("on", !!S[b._k])); sp.value = speed;
+    gb.forEach((b, i) => { b.classList.toggle("on", b._it.some(x => x[1] === tool)); }); gb[0].textContent = { cross: "✛", dot: "•", arrow: "➤" }[CUR];
+    props();
   }
   setInterval(upd, 250); addEventListener("resize", upd); upd();
 })();
