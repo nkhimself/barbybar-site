@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BarByBar: the market, one bar at a time</title>
+<meta name="description" content="Replay real S&P 500 sessions tick by tick. Watch every bar form, then trade it.">
+<style>
+:root{--bg:#0B1524;--s:#13233A;--l:#24395A;--t:#E8EEF6;--m:#8CA0BA;--a:#F5B642;--g:#2EC4A6;--r:#F0707A}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--t);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+a{color:inherit}button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 5vw;border-bottom:1px solid var(--l)}
+.logo{display:flex;gap:10px;align-items:center;font-weight:800;font-size:19px;letter-spacing:-.3px;text-decoration:none}
+#tm{color:var(--m);font-size:14px}#tm b{color:var(--a);font-variant-numeric:tabular-nums}
+.btn{background:var(--a);color:#1a1200;border:0;border-radius:10px;padding:11px 18px;font-weight:700;font-size:15px;text-decoration:none;display:inline-block}
+.btn.o{background:none;color:var(--t);border:1px solid var(--l)}
+.hero{display:grid;grid-template-columns:1fr auto;gap:5vw;align-items:center;padding:7vh 5vw;max-width:1200px;margin:auto}
+h1{font-size:clamp(40px,6.2vw,70px);line-height:1.02;letter-spacing:-2px;font-weight:800}
+.sub{color:var(--m);font-size:19px;max-width:30em;margin:18px 0 26px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}.note{color:var(--m);font-size:14px;margin-top:12px}
+.stage{display:flex;flex-direction:column;align-items:center;gap:12px}
+.dev{position:relative;width:min(290px,84vw);aspect-ratio:9/17;background:#000;border:6px solid #223250;border-radius:30px;overflow:hidden;transition:width .5s,aspect-ratio .5s,border-radius .5s}
+.dev.land{width:min(580px,92vw);aspect-ratio:2/1;border-radius:20px}
+.scr{position:absolute;inset:0;display:none;background:#0F1B2D}.scr.on{display:flex}
+#sp{align-items:center;justify-content:center;flex-direction:column;gap:6px}
+#sp b{font-size:20px;letter-spacing:-.4px;opacity:0}
+.k,.f,.d{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0)}
+.d{transform:translateY(-30px);opacity:0}
+.go .k{animation:up .45s ease-out forwards}.go .k2{animation-delay:.3s}.go .k3{animation-delay:.6s}
+.go .f{animation:up .4s .95s ease-out forwards}.go .d{animation:dp .35s 1.35s ease-in forwards}.go b{animation:fi .4s 1.5s forwards}
+@keyframes up{to{transform:scaleY(1)}}@keyframes dp{to{transform:none;opacity:1}}@keyframes fi{to{opacity:1}}
+#hm{flex-direction:column;padding:16px 14px;gap:10px;color:var(--t)}
+#hm h3{font-size:19px;letter-spacing:-.4px}#hm p{font-size:11px;color:var(--m);margin-top:-6px}
+.gr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cd{background:var(--s);border:1px solid var(--l);border-radius:12px;padding:10px;text-align:left;color:var(--t);font-size:13px;font-weight:600}
+.cd small{display:block;color:var(--m);font-weight:400;font-size:11px}
+.cd.p{grid-column:1/3;border-color:var(--a);background:#2a2412}.cd.z{opacity:.45}
+#ch{flex-direction:row;--cb:#13233A;--ct:#E8EEF6}
+.rail{width:38px;background:var(--cb);display:flex;flex-direction:column;gap:2px;padding:4px 0;z-index:2}
+.rail button,.bar button{background:none;border:0;color:var(--ct);font-size:16px;height:34px}
+.rail button.on{color:var(--a)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+#cv{flex:1;width:100%;min-height:0;display:block}
+.bar{height:34px;background:var(--cb);color:var(--ct);display:flex;align-items:center;gap:6px;padding:0 6px;font-size:12px}
+.bar input{width:60px;accent-color:#F5B642}.tf{opacity:.7}#clk{margin-left:auto;font-variant-numeric:tabular-nums}
+#pn{position:absolute;left:40px;top:6px;width:170px;max-height:calc(100% - 50px);overflow:auto;background:var(--cb);color:var(--ct);border:1px solid #8884;border-radius:10px;padding:6px;display:none;z-index:3}
+#pn.open{display:block}
+#pn button{display:block;width:100%;text-align:left;background:none;border:0;color:inherit;padding:5px 6px;border-radius:6px;font-size:12px}
+#pn button.on{background:#F5B64233;color:var(--a)}#pn i{font-style:normal;font-size:11px;opacity:.6;padding:2px 6px;display:block}
+.seg{display:inline-flex;border:1px solid var(--l);border-radius:10px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--m);padding:7px 12px;font-size:13px}.seg button.on{background:var(--a);color:#1a1200;font-weight:700}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.sec{max-width:1100px;margin:auto;padding:9vh 5vw 0}
+h2{font-size:clamp(28px,4vw,42px);letter-spacing:-1px;line-height:1.1;margin-bottom:26px;max-width:16em}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 40px}
+.fl div{padding:16px 0;border-top:1px solid var(--l)}.fl b{display:block;font-size:18px;margin-bottom:2px}.fl span{color:var(--m)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.two>div{border:1px solid var(--l);border-radius:16px;padding:24px;background:var(--s)}.two>div+div{border-color:var(--a)}
+.two h3{font-size:22px;margin-bottom:8px}.two li{color:var(--m);margin:6px 0 0 18px}
+footer{max-width:1100px;margin:auto;padding:10vh 5vw 6vh;color:var(--m);font-size:14px}footer b{color:var(--t)}
+#lk{position:fixed;inset:0;background:#050b14ee;display:none;align-items:center;justify-content:center;z-index:9;padding:20px}
+#lk.on{display:flex}#lk div{background:var(--s);border:1px solid var(--a);border-radius:16px;padding:28px;max-width:380px}
+#lk h3{font-size:24px;margin-bottom:8px}#lk p{color:var(--m);margin-bottom:14px}
+#lk input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l);background:var(--bg);color:var(--t);font-size:16px;margin-bottom:10px}
+@media(max-width:860px){.hero{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-delay:0s!important;transition:none!important}}
+</style></head><body>
+<nav><a class="logo" href="#"><svg width="30" height="30" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0F1B2D"/><path d="M9 9v14M16 6v16" stroke="#8CA0BA" stroke-width="1.6"/><rect x="6.5" y="12" width="5" height="7" fill="#2EC4A6"/><rect x="13.5" y="9" width="5" height="9" fill="#F0707A"/><rect x="21" y="12" width="5" height="10" fill="none" stroke="#F5B642" stroke-width="1.6" stroke-dasharray="2 1.5"/><circle cx="23.5" cy="9" r="1.8" fill="#F5B642"/></svg>BarByBar</a>
+<span id="tm">Free replay: <b id="tl">2:00:00</b> left</span></nav>
+
+<header class="hero"><div>
+<h1>The market, one bar at a time.</h1>
+<p class="sub">Replay real S&amp;P 500 sessions tick by tick. Watch every bar form, then trade it, and review every decision.</p>
+<div class="cta"><a class="btn" href="#try">Start free replay</a><a class="btn o" href="#free">What is free</a></div>
+<p class="note">No sign-up for your first 2 hours.</p></div>
+<div class="stage" id="try">
+<div class="dev" id="dev">
+<div class="scr on go" id="sp"><svg width="150" viewBox="0 0 120 100"><g class="k k1"><path d="M25 38v50" stroke="#8CA0BA" stroke-width="2"/><rect x="17" y="52" width="16" height="22" fill="#2EC4A6"/></g><g class="k k2"><path d="M55 22v52" stroke="#8CA0BA" stroke-width="2"/><rect x="47" y="32" width="16" height="30" fill="#F0707A"/></g><g class="k k3"><path d="M85 30v52" stroke="#8CA0BA" stroke-width="2"/><rect x="77" y="40" width="16" height="30" fill="#2EC4A6"/></g><rect class="f" x="103" y="44" width="14" height="34" fill="none" stroke="#F5B642" stroke-width="2" stroke-dasharray="4 3"/><circle class="d" cx="110" cy="36" r="5" fill="#F5B642"/></svg><b>BarByBar</b></div>
+<div class="scr" id="hm"><h3>BarByBar</h3><p>The market, one bar at a time.</p><div class="gr">
+<button class="cd p" data-go="ch">Continue<small>14 Nov 2024, bar 31 at 12:05</small></button>
+<button class="cd" data-go="ch">New replay<small>Random day or pick a date</small></button>
+<button class="cd z">Daily challenge<small>Soon</small></button>
+<button class="cd" data-m="Trade log opens in landscape in the app">Trade log<small>Journal and CSV</small></button>
+<button class="cd" data-m="Stats: R curve, win rate per setup tag">Stats<small>Your edge in numbers</small></button>
+<button class="cd" data-m="Settings: look, colors, timeframe, tags">Settings<small>Look and tags</small></button>
+<button class="cd" data-m="Account opens with sign-up">Account<small>Login and backup</small></button></div></div>
+<div class="scr" id="ch"><div class="rail" id="rl"></div><div class="main"><canvas id="cv"></canvas><div class="bar"><button id="bk" title="Home">&#8962;</button><button id="pl" title="Play">&#9654;</button><input type="range" id="sd" min="1" max="8" value="3" aria-label="Speed"><span class="tf">5m</span><span class="tf">15m</span><span class="tf">1h</span><span id="clk">09:30</span></div></div><div id="pn"></div></div>
+</div>
+<div class="row"><div class="seg" id="sk"><button data-k="classic">Classic</button><button data-k="modern" class="on">Modern</button><button data-k="blind">Color-blind</button></div>
+<div class="seg" id="lv"><button data-v="0" class="on">Simple</button><button data-v="1">Pro</button></div></div>
+<button class="btn o" id="rp">Replay opening</button>
+</div></header>
+
+<section class="sec"><h2>Built for reading price action, open to every trader.</h2>
+<div class="fl">
+<div><b>Live forming bar</b><span>Each bar builds tick by tick, like a real chart. You set the speed.</span></div>
+<div><b>Real S&amp;P 500 sessions</b><span>Regular hours, 09:30 to 16:15 New York, 81 five-minute bars a day.</span></div>
+<div><b>Trade it, then review it</b><span>Drag stop and target, take partials, and see every result in R.</span></div>
+<div><b>Two looks, one engine</b><span>Classic white for the traditional chart, Modern dark for long sessions, blue and orange for color-blind traders.</span></div>
+<div><b>Simple by default</b><span>Only the chart, play controls and timeframes. Turn on Pro when you want more tools.</span></div>
+<div><b>Plays offline</b><span>Days are saved on your phone after the first load.</span></div></div></section>
+
+<section class="sec" id="free"><h2>Try it first. Sign up when it helps.</h2>
+<div class="two"><div><h3>First 2 hours</h3><ul><li>No account needed</li><li>Replay real days with all the tools</li><li>One tap to start</li></ul></div>
+<div><h3>Free account</h3><ul><li>Trade log and CSV export</li><li>Stats and cloud backup</li><li>Daily challenge, coming soon</li><li>Sign in with an SMS code</li></ul></div></div></section>
+<footer><b>BarByBar</b> is an independent practice tool for price action traders. It is not affiliated with Al Brooks or any trading course. Replays are for education, not advice.</footer>
+
+<div id="lk"><div><h3>Your free 2 hours are over</h3><p>Create a free account to keep replaying and to save your trades.</p><input id="ph" type="tel" placeholder="Mobile number" aria-label="Mobile number"><button class="btn" id="sg">Send code</button><p id="lm" style="margin:10px 0 0"></p></div></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const SK={classic:{bg:"#fff",up:"#fff",dn:"#000",wk:"#000",gr:"#e8e8e8",tx:"#333",ac:"#d99000",cb:"#f0f0f0",ct:"#222",bd:1},
+modern:{bg:"#0F1B2D",up:"#2EC4A6",dn:"#F0707A",gr:"#1d304b",tx:"#8CA0BA",ac:"#F5B642",cb:"#13233A",ct:"#E8EEF6"},
+blind:{bg:"#0F1B2D",up:"#3B9CFF",dn:"#FF9F1C",gr:"#1d304b",tx:"#8CA0BA",ac:"#F5B642",cb:"#13233A",ct:"#E8EEF6"}};
+let skin="modern",pro=0,ema=1,nums=1,run=0,tmr,tick0=0;
+// screens
+function show(id){$$(".scr").forEach(e=>e.classList.toggle("on",e.id==id));$("#dev").classList.toggle("land",id=="ch");if(id!="ch")stop();else setTimeout(draw,560)}
+function splash(){const s=$("#sp");s.classList.remove("go");void s.offsetWidth;s.classList.add("go");show("sp");setTimeout(()=>{if($("#sp").classList.contains("on"))show("hm")},2300)}
+setTimeout(()=>show("hm"),2300);
+$$("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+$$("[data-m]").forEach(b=>b.onclick=()=>{const s=b.querySelector("small"),o=s.textContent;s.textContent=b.dataset.m;setTimeout(()=>s.textContent=o,1600)});
+$("#bk").onclick=()=>show("hm");$("#rp").onclick=splash;
+// data
+let seed=7;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;
+let bars=[],p=5800;
+function mk(){const o=p;let h=o,l=o,c=o;for(let i=0;i<12;i++){c+=(rnd()-.48)*2.2;h=Math.max(h,c);l=Math.min(l,c)}p=c;return{o,h,l,c,n:12}}
+for(let i=0;i<72;i++)bars.push(mk());
+let cur={o:p,h:p,l:p,c:p,n:0};
+function tick(){cur.c+=(rnd()-.48)*2.2;cur.h=Math.max(cur.h,cur.c);cur.l=Math.min(cur.l,cur.c);if(++cur.n>=12){bars.push(cur);if(bars.length>300)bars.shift();p=cur.c;cur={o:p,h:p,l:p,c:p,n:0}}}
+// chart
+function draw(){const k=SK[skin],cv=$("#cv"),w=cv.clientWidth,h=cv.clientHeight,d=devicePixelRatio||1;if(!w||!h)return;
+cv.width=w*d;cv.height=h*d;const x=cv.getContext("2d");x.scale(d,d);x.fillStyle=k.bg;x.fillRect(0,0,w,h);
+const all=bars.concat([cur]),N=Math.min(all.length,Math.floor((w-44)/8)),off=all.length-N,v=all.slice(off);
+let hi=-1e9,lo=1e9;v.forEach(b=>{hi=Math.max(hi,b.h);lo=Math.min(lo,b.l)});const pd=(hi-lo)*.12||1;hi+=pd;lo-=pd;
+const W=w-44,bw=W/N,Y=q=>h-14-(q-lo)/(hi-lo)*(h-28);
+x.font="10px sans-serif";x.textAlign="left";
+for(let i=0;i<5;i++){const q=lo+(hi-lo)*i/4,y=Y(q);x.strokeStyle=k.gr;x.beginPath();x.moveTo(0,y);x.lineTo(W,y);x.stroke();x.fillStyle=k.tx;x.fillText(q.toFixed(1),W+4,y+3)}
+v.forEach((b,i)=>{const cx=i*bw+bw/2,up=b.c>=b.o,bc=up?k.up:k.dn;x.strokeStyle=k.wk||bc;x.beginPath();x.moveTo(cx,Y(b.h));x.lineTo(cx,Y(b.l));x.stroke();
+const t=Y(Math.max(b.o,b.c)),bh=Math.max(1,Math.abs(Y(b.o)-Y(b.c)));x.fillStyle=bc;x.fillRect(cx-bw*.34,t,bw*.68,bh);if(k.bd){x.strokeStyle="#000";x.strokeRect(cx-bw*.34,t,bw*.68,bh)}
+if(nums){const n=(off+i)%81+1;if(n==1||n==3||n==6||n==9){x.fillStyle=k.tx;x.textAlign="center";x.fillText(n,cx,Y(b.l)+11);x.textAlign="left"}}});
+if(ema){let e=all[0].c;const a=2/21;x.strokeStyle=k.ac;x.lineWidth=1.4;x.beginPath();all.forEach((b,i)=>{e+=(b.c-e)*a;if(i>=off){const X=(i-off)*bw+bw/2;i==off?x.moveTo(X,Y(e)):x.lineTo(X,Y(e))}});x.stroke();x.lineWidth=1}
+const L=v[v.length-1],lx=(N-1)*bw+bw/2;x.strokeStyle=k.ac;x.setLineDash([3,2]);x.strokeRect(lx-bw*.5,Y(L.h)-1,bw,Y(L.l)-Y(L.h)+2);x.beginPath();x.moveTo(0,Y(L.c));x.lineTo(W,Y(L.c));x.stroke();x.setLineDash([]);
+x.fillStyle=k.ac;x.fillRect(W,Y(L.c)-7,44,14);x.fillStyle="#1a1200";x.fillText(L.c.toFixed(1),W+4,Y(L.c)+3);x.beginPath();x.arc(lx,Y(L.h)-6,2.6,0,7);x.fillStyle=k.ac;x.fill();
+const m=570+(bars.length%81)*5+Math.floor(cur.n*5/12);$("#clk").textContent=String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")}
+function go(){stop();run=1;$("#pl").innerHTML="&#10074;&#10074;";$("#pn").classList.remove("open");$$("#rl button").forEach(b=>b.classList.remove("on"));tmr=setInterval(()=>{tick();draw()},300/$("#sd").value)}
+function stop(){run=0;clearInterval(tmr);$("#pl").innerHTML="&#9654;"}
+$("#pl").onclick=()=>run?stop():go();$("#sd").oninput=()=>run&&go();addEventListener("resize",draw);
+// look + level
+function look(){const k=SK[skin],c=$("#ch");c.style.setProperty("--cb",k.cb);c.style.setProperty("--ct",k.ct);$$("#sk button").forEach(b=>b.classList.toggle("on",b.dataset.k==skin));draw()}
+$("#sk").onclick=e=>{if(e.target.dataset.k){skin=e.target.dataset.k;look();panel()}};
+$("#lv").onclick=e=>{if(e.target.dataset.v){pro=+e.target.dataset.v;$$("#lv button").forEach(b=>b.classList.toggle("on",b.dataset.v==e.target.dataset.v));panel()}};
+// rail and panel
+const G={Draw:["\u2571",["Horizontal line","Trend line"],["Rectangle","Channel","Fibonacci","Measured move"]],
+Trade:["\u21C5",["Buy","Sell","Stop and target"],["Partial exit","Break-even","Rule check"]],
+View:["\u25EB",["EMA 20","Bar numbers"],["Prior day lines","Day separators"]],
+Look:["\u25D0",["Classic","Modern","Color-blind"],[]]};
+let openG=null;
+$("#rl").innerHTML=Object.keys(G).map(n=>`<button data-g="${n}" title="${n}" aria-label="${n}">${G[n][0]}</button>`).join("");
+$("#rl").onclick=e=>{const g=e.target.dataset.g;if(!g)return;if(run)stop();openG=openG==g?null:g;panel()};
+function panel(){const pn=$("#pn");$$("#rl button").forEach(b=>b.classList.toggle("on",b.dataset.g==openG));if(!openG){pn.classList.remove("open");return}
+const it=G[openG][1].concat(pro?G[openG][2]:[]);const on=n=>n=="EMA 20"?ema:n=="Bar numbers"?nums:({Classic:"classic",Modern:"modern","Color-blind":"blind"}[n]==skin);
+pn.innerHTML="<i>"+openG+(pro?" (Pro)":"")+"</i>"+it.map(n=>`<button class="${on(n)?"on":""}">${n}</button>`).join("");pn.classList.add("open")}
+$("#pn").onclick=e=>{const n=e.target.textContent;if(e.target.tagName!="BUTTON")return;
+if(n=="EMA 20")ema^=1;else if(n=="Bar numbers")nums^=1;else if(n=="Classic")skin="classic";else if(n=="Modern")skin="modern";else if(n=="Color-blind")skin="blind";else e.target.classList.toggle("on");
+look();if(!/^(EMA 20|Bar numbers|Classic|Modern|Color-blind)$/.test(n))return;panel()};
+// free trial gate (demo only: the real lock must be enforced by the server)
+const q=new URLSearchParams(location.search),TL=(+q.get("trial")||120)*60000;
+let t0=+localStorage.getItem("bbt0");if(!t0){t0=Date.now();try{localStorage.setItem("bbt0",t0)}catch(e){}}
+function clock(){const r=TL-(Date.now()-t0);if(r<=0){$("#tl").textContent="0:00:00";$("#lk").classList.add("on");stop();return}
+const s=Math.floor(r/1000);$("#tl").textContent=Math.floor(s/3600)+":"+String(Math.floor(s%3600/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+setInterval(clock,1000);clock();
+$("#sg").onclick=()=>$("#lm").textContent="Sign-up opens with the next version. This page is a design preview.";
+look();
+</script></body></html>
