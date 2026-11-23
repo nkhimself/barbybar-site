@@ -175,6 +175,15 @@
   #cmenu hr{border:0;border-top:1px solid #24395A;margin:4px 0}
   #dfly i.h{border-top:1px solid #24395A;margin-top:4px;padding-top:6px}
   .dr{display:flex;gap:8px;align-items:center}.fg{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}.fg div{display:flex;gap:6px;align-items:center}.fg input[type=number]{width:70px}.fg input[type=color]{width:30px;height:26px;padding:0}
+
+  .ind{position:absolute;left:8px;top:26px;font:12px system-ui,sans-serif;color:#8CA0BA;pointer-events:none}
+  .nav{position:absolute;left:8px;bottom:34px;display:flex;gap:4px;opacity:0;transition:opacity .2s;z-index:3}.pbox:hover .nav{opacity:1}body.nvA .nav{opacity:1}body.nvO .nav{display:none}
+  .nav button{width:28px;height:28px;border-radius:50%;background:#13233Acc;color:#E8EEF6;border:1px solid #24395A;cursor:pointer;font-size:14px;padding:0}
+  #mtp,#imenu{position:fixed;z-index:55;background:#13233A;color:#E8EEF6;border:1px solid #24395A;border-radius:12px;padding:8px;box-shadow:0 10px 34px #000a;font:13px system-ui,sans-serif}
+  #mtp[hidden],#imenu[hidden]{display:none}
+  #mtp table{border-collapse:collapse;min-width:520px}#mtp th{color:#8CA0BA;font-weight:400;text-align:left;padding:4px 10px}#mtp td{padding:7px 10px;border-top:1px solid #24395A}#mtp tbody tr{cursor:pointer}#mtp tbody tr:hover{background:#1b3358}
+  .buy{color:#2EC4A6}.sell{color:#F0707A}
+  #imenu button{display:flex;justify-content:space-between;gap:20px;width:100%;text-align:left;background:none;border:0;color:inherit;padding:7px 10px;border-radius:6px;font:inherit;cursor:pointer}#imenu button:hover{background:#1b3358}
 </style>
 </head>
 <body>
@@ -228,13 +237,16 @@ const DATA_BASE = (() => {
   if (q) return q.endsWith("/") ? q : q + "/";
   return "https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/";
 })();
-const VER = "4.6.0";
+const VER = "4.7.0";
+let LP = null;
+const dOn = (o, p) => (o.pid == null ? panels.indexOf(main) : o.pid) === panels.indexOf(p);
+const vTL = p => p.tl != null ? p.tl : S.showLines !== false, vHI = p => p.hi2 != null ? p.hi2 : S.showHist !== false;
 const THEMES = { classic: { w: "#fff", k: "#000", up: "#fff", dn: "#000", bd: 1, pc: "#1a5fb4" }, modern: { w: "#0F1B2D", k: "#9FB0C7", up: "#2EC4A6", dn: "#F0707A", bd: 0, pc: "#5AA9FF" }, blind: { w: "#0F1B2D", k: "#9FB0C7", up: "#3B9CFF", dn: "#FF9F1C", bd: 0, pc: "#F5B642" } };
 let SKIN = (function () { try { return localStorage.getItem("bbb_skin"); } catch (e) { return null; } })() || (matchMedia("(pointer:fine)").matches && innerWidth >= 900 ? "modern" : "classic");
 if (!THEMES[SKIN]) SKIN = "classic";
 let TH = THEMES[SKIN], DHIDE = false, DLOCK = false;
 const ONE = { hr: 1, vl: 1, txt: 1, note: 1, pnote: 1, tnote: 1, cmt: 1, amup: 1, amdn: 1, long: 1, short: 1 }, TXT = { txt: 1, note: 1, pnote: 1, tnote: 1, cmt: 1 };
-const TWO = { tl: 1, ray: 1, info: 1, ext: 1, arrow: 1, amk: 1, rect: 1, fib: 1, prange: 1, drange: 1, dprange: 1, callout: 1 }, THREE = { ch: 1, flat: 1, fx: 1, fibx: 1 }, MEAS = { prange: 1, drange: 1, dprange: 1 };
+const TWO = { tl: 1, ray: 1, info: 1, ext: 1, arrow: 1, amk: 1, rect: 1, fib: 1, prange: 1, drange: 1, dprange: 1, callout: 1 }, THREE = { disj: 1, ch: 1, flat: 1, fx: 1, fibx: 1 }, MEAS = { prange: 1, drange: 1, dprange: 1 };
 const FIBD = [[0, "#787b86", 1], [0.236, "#f23645", 0], [0.382, "#ff9800", 0], [0.5, "#4caf50", 1], [0.618, "#089981", 0], [0.786, "#00bcd4", 0], [1, "#787b86", 1], [1.618, "#2962ff", 0], [2.618, "#f23645", 0], [3.618, "#9c27b0", 0], [4.236, "#e91e63", 0]];
 let CFG = (function () { try { return JSON.parse(localStorage.getItem("bbb_cfg") || "{}"); } catch (e) { return {}; } })();
 const DASH = { 1: [6, 4], 2: [1.5, 3.5] };
@@ -244,7 +256,7 @@ const TFS = [5, 15, 45, 60, 1440];
 const TF_LABEL = { 5: "5m", 15: "15m", 45: "45m", 60: "1h", 1440: "1D" };
 const SESSION_MS = 405 * 60000;              // 09:30 -> 16:15 New York = 81 five-minute bars
 const OPEN_MIN = 9 * 60 + 30;
-const PAD = 5;                               // empty slots right of the live bar
+let PAD = (CFG.mr != null ? CFG.mr : 5);                               // empty slots right of the live bar
 const K = 2 / 21;                            // 20-period EMA
 let AXIS_W = 52;                            // set below to fit a 4-digit price with 2 decimals
 const AXIS_H = 20, SNAP = 0.25, MIN_RISK = 0.5;
@@ -395,7 +407,7 @@ async function loadMonth(key) {
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 function fmtDate(s) { const [y, m, d] = s.split("-").map(Number); return d + " " + MON[m - 1]; }
-function fmtDayDate(s) { const dt = new Date(s + "T00:00:00Z"); return WD[dt.getUTCDay()] + " " + fmtDate(s); }
+function fmtDayDate(s) { const dt = new Date(s + "T00:00:00Z"), df = CFG.df || 0, base = df === 1 ? s : df === 2 ? s.slice(8) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4) : fmtDate(s) + (df === 3 ? " '" + s.slice(2, 4) : ""); return (CFG.dw === 0 ? "" : WD[dt.getUTCDay()] + " ") + base; }
 function fmtDateLong(s) { const dt = new Date(s + "T00:00:00Z"); return WD[dt.getUTCDay()] + " " + fmtDate(s) + " " + s.slice(0, 4); }
 function weekKey(s) {
   const dt = new Date(s + "T00:00:00Z"), dow = (dt.getUTCDay() + 6) % 7;
@@ -540,7 +552,7 @@ async function goDay(i, keep) {
 }
 
 // ---------- formatting ----------
-function hhmm(min) { return String(Math.floor(min / 60)).padStart(2, "0") + ":" + String(min % 60).padStart(2, "0"); }
+function hhmm(min) { const h = Math.floor(min / 60), m = String(min % 60).padStart(2, "0"); return CFG.h12 ? ((h % 12) || 12) + ":" + m + (h < 12 ? " AM" : " PM") : String(h).padStart(2, "0") + ":" + m; }
 function fmtClock(ms) {
   const s = Math.floor(ms / 1000), m = OPEN_MIN * 60 + s;
   return hhmm(Math.floor(m / 60)) + ":" + String(m % 60).padStart(2, "0");
@@ -655,7 +667,7 @@ function drawPanel(p) {
   let hi = -Infinity, lo = Infinity;
   for (let i = i0; i <= i1; i++) { if (arr[i].h > hi) hi = arr[i].h; if (arr[i].l < lo) lo = arr[i].l; }
   if (!isFinite(hi)) { p.map = null; return; }
-  const padp = Math.max((hi - lo) * 0.08, 0.5); hi += padp; lo -= padp;
+  const rg0 = hi - lo; hi += Math.max(rg0 * (CFG.mt != null ? CFG.mt : 8) / 100, 0.25); lo -= Math.max(rg0 * (CFG.mb != null ? CFG.mb : 8) / 100, 0.25);
   if (p.fix) { hi = p.fix.hi; lo = p.fix.lo; }      // manual price scale: the window stays where you put it, bars may leave the screen
   const y = pr => (hi - pr) / (hi - lo) * phc;
   p.map = { pw, ph, phc, hi, lo, slot, n, arr, off, i0, i1 };
@@ -696,7 +708,7 @@ function drawPanel(p) {
     }
   }
   // 20 EMA
-  {
+  if (S.ema !== false) {
     ctx.strokeStyle = "#00a0a8"; ctx.lineWidth = 1.3; ctx.beginPath();
     for (let i = i0; i <= i1; i++) { const x = xc(i) + 0.5, yy = y(arr[i].e); if (i === i0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy); }
     ctx.stroke();
@@ -718,10 +730,12 @@ function drawPanel(p) {
   if (cross && cross.panel === p) drawCross(p, ctx, pw, phc);
   ctx.restore();
 
+  if (CFG.hl) { let H = -1e9, L = 1e9; for (let i = i0; i <= i1; i++) { if (arr[i].h > H) H = arr[i].h; if (arr[i].l < L) L = arr[i].l; } ctx.save(); ctx.strokeStyle = CFG.hlc || TH.k; ctx.fillStyle = CFG.hlc || TH.k; ctx.setLineDash([2, 3]); ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; [[H, "H "], [L, "L "]].forEach(([v, t]) => { const yy = Math.round(y(v)) + .5; ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(pw, yy); ctx.stroke(); ctx.fillText(t + v.toFixed(2), 4, yy + (t === "H " ? 8 : -8)); }); ctx.restore(); }
+  if (CFG.pdl || CFG.pdt) { const cd = arr[n - 1].d; let k = n - 1; while (k >= 0 && arr[k].d === cd) k--; if (k >= 0) { const v = arr[k].c, yy = Math.round(y(v)) + .5; ctx.save(); ctx.strokeStyle = "#6a3fb0"; if (CFG.pdl) { ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(pw, yy); ctx.stroke(); } if (CFG.pdt) { ctx.fillStyle = "#6a3fb0"; ctx.fillRect(pw + 1, yy - 8, AXIS_W - 1, 16); ctx.fillStyle = "#fff"; ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText("PDC " + v.toFixed(1), pw + 4, yy); } ctx.restore(); } }
   // price axis
-  ctx.font = "11px system-ui,sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+  ctx.font = (CFG.ts || 11) + "px system-ui,sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
   const step = niceStep(hi - lo, Math.max(3, phc / 46));
-  ctx.fillStyle = TH.k; ctx.strokeStyle = TH.k; ctx.lineWidth = 1;
+  ctx.fillStyle = CFG.tc || TH.k; ctx.strokeStyle = CFG.tc || TH.k; ctx.lineWidth = 1;
   for (let pr = Math.ceil(lo / step) * step; pr < hi; pr += step) {
     const yy = Math.round(y(pr)) + 0.5;
     ctx.beginPath(); ctx.moveTo(pw, yy); ctx.lineTo(pw + 4, yy); ctx.stroke();
@@ -729,11 +743,11 @@ function drawPanel(p) {
   }
   if (lastPrice != null) {
     const yy = Math.round(y(lastPrice)) + 0.5;
-    ctx.fillStyle = "#222"; ctx.fillRect(pw + 1, yy - 9, AXIS_W - 1, 18);
+    { const lbr = arr[arr.length - 1]; ctx.fillStyle = CFG.sl && lbr ? (lbr.c >= lbr.o ? CFG.slu || TH.up : CFG.sld || TH.dn) : "#222"; } ctx.fillRect(pw + 1, yy - 9, AXIS_W - 1, 18);
     ctx.fillStyle = TH.w; ctx.fillText(lastPrice.toFixed(2), pw + 6, yy);
   }
   // time axis
-  ctx.fillStyle = TH.k; ctx.textAlign = "center"; ctx.strokeStyle = TH.k;
+  ctx.fillStyle = CFG.tc || TH.k; ctx.textAlign = "center"; ctx.strokeStyle = CFG.tc || TH.k;
   let lastX = -1e9;
   const labW = tf === 1440 ? 72 : 108;
   let SS = 405; for (const m of NICE_MIN) if (m % tf === 0 && (m / tf) * slot >= labW) { SS = m; break; }
@@ -748,7 +762,7 @@ function drawPanel(p) {
     lastX = x;
   }
   // frame
-  ctx.strokeStyle = TH.k; ctx.lineWidth = 1; ctx.strokeRect(0.5, 0.5, pw, ph);
+  ctx.strokeStyle = CFG.lc || TH.k; ctx.lineWidth = 1; ctx.setLineDash(DASH[CFG.ls] || []); ctx.strokeRect(0.5, 0.5, pw, ph); ctx.setLineDash([]);
   // cross labels on the axes
   if (cross && cross.panel === p) drawCrossAxis(p, ctx, pw, ph);
 }
@@ -783,6 +797,7 @@ function refHit(p, x, y) {       // returns the prior-period line under the pixe
 // ---------- chart drawings (horizontal line, trend line, rectangle, channel, Fibonacci) ----------
 const PCOL = "#1a5fb4";
 function objPix(p, o) {          // pixel points of an object on this panel
+  if (!dOn(o, p)) return o.pts.map(() => null);
   if (o.st && o.st.vis && o.st.vis.indexOf(p.tf) < 0) return o.pts.map(() => null);
   if (o.kind === "long" || o.kind === "short") { const a = o.pts[0]; o.pts[1] = { date: a.date, ms: a.ms, p: o.pts[1].p }; o.pts[2] = { date: a.date, ms: a.ms, p: o.pts[2].p }; o.pts[3] = { date: o.pts[3].date, ms: o.pts[3].ms, p: a.p }; }
   return o.pts.map(pt => { const T = Tof(pt.date, pt.ms); return T == null ? null : { x: xOfT(p, T), y: yOfP(p, pt.p) }; });
@@ -846,9 +861,9 @@ function drawObj(p, ctx, o, sel) {
     const dP = o.pts[1].p - o.pts[0].p, xl = P[2].x, xr = st.extR ? pw : fxRight(P);
     ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[2].x, P[2].y); ctx.stroke(); ctx.setLineDash(DASH[st.dash] || []);
     for (const [f, c, on] of (st.lvs || [[0, "", 1], [0.618, "", 1], [1, "", 1], [1.618, "", 1], [2.618, "", 1]])) { if (!on) continue; const pr = o.pts[2].p + dP * f, yy = yOfP(p, pr); if (c && !st.one) ctx.strokeStyle = c; ctx.beginPath(); ctx.moveTo(xl, yy); ctx.lineTo(xr, yy); ctx.stroke(); if (st.lab) { ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText(f + " (" + pr.toFixed(2) + ")", xl + 3, yy - 1); } }
-  } else if (o.kind === "brush" || o.kind === "hlt" || o.kind === "poly") {
+  } else if (o.kind === "brush" || o.kind === "poly") {
     ctx.lineJoin = "round"; ctx.lineCap = "round";
-    if (o.kind === "hlt") { ctx.globalAlpha = .35; ctx.lineWidth = st.w || 14; if (!st.col) ctx.strokeStyle = "#F5B642"; } else ctx.lineWidth = st.w || 2;
+    ctx.lineWidth = st.w || 2;
     ctx.beginPath(); P.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.stroke(); ctx.globalAlpha = 1;
   } else if (o.kind === "note" || o.kind === "pnote" || o.kind === "tnote" || o.kind === "cmt" || o.kind === "callout") {
     const t = o.text || "";
@@ -868,13 +883,16 @@ function drawObj(p, ctx, o, sel) {
     const x = Math.min(P[0].x, P[1].x), yy = Math.min(P[0].y, P[1].y), w = Math.abs(P[1].x - P[0].x), h = Math.abs(P[1].y - P[0].y);
     const X0 = st.extL ? 0 : x, X1 = st.extR ? pw : x + w; ctx.globalAlpha = st.op ?? 0.12; ctx.fillRect(X0, yy, X1 - X0, h); ctx.globalAlpha = 1; ctx.strokeRect(X0, yy, X1 - X0, h); if (MEAS[o.kind]) measLabel(ctx, p, o, x, yy, w, h);
   } else if (o.kind === "ch") {
-    ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke();
+    const E1 = ends(o, P, pw); ctx.beginPath(); ctx.moveTo(E1[0], E1[1]); ctx.lineTo(E1[2], E1[3]); ctx.stroke();
     if (o.pts.length > 2) {
-      const dy = yOfP(p, o.pts[0].p + chPrice2(o)) - P[0].y;
-      ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y + dy); ctx.lineTo(P[1].x, P[1].y + dy); ctx.stroke();
-      ctx.globalAlpha = st.op ?? 0.07; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[1].x, P[1].y + dy); ctx.lineTo(P[0].x, P[0].y + dy); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
-      ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y + dy / 2); ctx.lineTo(P[1].x, P[1].y + dy / 2); ctx.stroke();
+      const dy = yOfP(p, o.pts[0].p + chPrice2(o)) - P[0].y, Q = P.slice(0, 2).map(q => ({ x: q.x, y: q.y + dy })), E2 = ends(o, Q, pw);
+      ctx.beginPath(); ctx.moveTo(E2[0], E2[1]); ctx.lineTo(E2[2], E2[3]); ctx.stroke();
+      ctx.globalAlpha = st.op ?? 0.07; ctx.beginPath(); ctx.moveTo(E1[0], E1[1]); ctx.lineTo(E1[2], E1[3]); ctx.lineTo(E2[2], E2[3]); ctx.lineTo(E2[0], E2[1]); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo((E1[0] + E2[0]) / 2, (E1[1] + E2[1]) / 2); ctx.lineTo((E1[2] + E2[2]) / 2, (E1[3] + E2[3]) / 2); ctx.stroke();
     }
+  } else if (o.kind === "disj") {
+    ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke();
+    if (P.length > 3) { ctx.beginPath(); ctx.moveTo(P[2].x, P[2].y); ctx.lineTo(P[3].x, P[3].y); ctx.stroke(); ctx.globalAlpha = st.op ?? 0.07; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[3].x, P[3].y); ctx.lineTo(P[2].x, P[2].y); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; }
   } else if (o.kind === "fib") {
     const a = o.pts[0].p, b = o.pts[1].p, xl = st.extL ? 0 : Math.min(P[0].x, P[1].x), xr = st.extR ? pw : Math.max(P[0].x, P[1].x), LV = (st.lvs || FIBD).filter(q => q[2]);
     ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke(); ctx.setLineDash(DASH[st.dash] || []);
@@ -898,7 +916,7 @@ function drawObj(p, ctx, o, sel) {
     }
     ctx.setLineDash([]);
   }
-  if (sel && o.kind !== "brush" && o.kind !== "hlt") {                       // handles
+  if (sel && o.kind !== "brush") {                       // handles
     ctx.fillStyle = "#fff"; ctx.lineWidth = 2;
     const hp = o.kind === "h" ? [{ x: 18, y: P[0].y }] : P;
     for (const v of hp) { ctx.beginPath(); ctx.arc(v.x, v.y, 6, 0, 6.3); ctx.fill(); ctx.stroke(); }
@@ -920,19 +938,20 @@ function drawHit(p, x, y) {
     const o = drawings[k], P = objPix(p, o); if (P.some(v => v === null)) continue;
     if (o.id === selDraw) {                       // handles first on the selected object
       const hp = o.kind === "h" ? [{ x: 18, y: P[0].y }] : P;
-      for (let i = 0; i < hp.length && o.kind !== "brush" && o.kind !== "hlt"; i++) if (Math.hypot(hp[i].x - x, hp[i].y - y) < tolH) return { o, handle: i };
+      for (let i = 0; i < hp.length && o.kind !== "brush"; i++) if (Math.hypot(hp[i].x - x, hp[i].y - y) < tolH) return { o, handle: i };
     }
     let d = 1e9;
     if (o.kind === "h") d = Math.abs(P[0].y - y);
     else if (o.kind === "tl" || o.kind === "arrow" || o.kind === "ray" || o.kind === "info" || o.kind === "ext" || o.kind === "amk") { const E = ends(o, P, p.map.pw); d = segDist(x, y, E[0], E[1], E[2], E[3]); }
     else if (o.kind === "vl") d = Math.abs(P[0].x - x);
     else if (o.kind === "cl") d = Math.min(Math.abs(P[0].x - x), Math.abs(P[0].y - y));
+    else if (o.kind === "disj") d = P.length > 3 ? Math.min(segDist(x, y, P[0].x, P[0].y, P[1].x, P[1].y), segDist(x, y, P[2].x, P[2].y, P[3].x, P[3].y)) : segDist(x, y, P[0].x, P[0].y, P[1].x, P[1].y);
     else if (o.kind === "hr") d = x >= P[0].x - 6 ? Math.abs(P[0].y - y) : 1e9;
     else if (o.kind === "amup" || o.kind === "amdn") d = Math.max(0, Math.hypot(P[0].x - x, P[0].y + (o.kind === "amup" ? 13 : -13) - y) - 10);
     else if (o.kind === "long" || o.kind === "short") { const x0 = P[0].x, x1 = Math.max(P[3].x, x0 + 10), y0 = Math.min(P[0].y, P[1].y, P[2].y), y1 = Math.max(P[0].y, P[1].y, P[2].y); d = x >= x0 && x <= x1 && y >= y0 && y <= y1 ? 0 : 1e9; }
     else if (o.kind === "flat") d = Math.min(segDist(x, y, P[0].x, P[0].y, P[1].x, P[1].y), segDist(x, y, P[0].x, P[2].y, P[1].x, P[2].y));
     else if (o.kind === "fibx") d = Math.min(segDist(x, y, P[0].x, P[0].y, P[1].x, P[1].y), segDist(x, y, P[1].x, P[1].y, P[2].x, P[2].y));
-    else if (o.kind === "brush" || o.kind === "hlt" || o.kind === "poly") { d = 1e9; for (let i = 0; i < P.length - 1; i++) d = Math.min(d, segDist(x, y, P[i].x, P[i].y, P[i + 1].x, P[i + 1].y)); }
+    else if (o.kind === "brush" || o.kind === "poly") { d = 1e9; for (let i = 0; i < P.length - 1; i++) d = Math.min(d, segDist(x, y, P[i].x, P[i].y, P[i + 1].x, P[i + 1].y)); }
     else if (o.kind === "note" || o.kind === "pnote" || o.kind === "cmt") { const bx = o.kind === "cmt" ? P[0].x - 10 : P[0].x, by = o.kind === "cmt" ? P[0].y - 22 : P[0].y; d = x >= bx - 4 && x <= bx + (o.text || "").length * 7 + 24 && Math.abs(y - by) < 13 ? 0 : (o.kind === "pnote" ? Math.abs(P[0].y - y) : 1e9); }
     else if (o.kind === "tnote") d = Math.abs(P[0].x - x);
     else if (o.kind === "callout") d = Math.min(segDist(x, y, P[0].x, P[0].y, P[1].x, P[1].y), x >= P[1].x - 4 && x <= P[1].x + (o.text || "").length * 7 + 24 && Math.abs(y - P[1].y) < 13 ? 0 : 1e9);
@@ -1015,7 +1034,7 @@ const ptrs = new Map();
 let G = null;           // the one-finger gesture in progress
 let pinch = null;
 
-const TOOL_HINT = { hr: "Horizontal ray: tap a point", info: "Info line: press, drag, release", ext: "Extended line: press, drag, release", amk: "Arrow marker: press, drag, release", amup: "Arrow mark up: tap a bar", amdn: "Arrow mark down: tap a bar", note: "Note: tap where it goes", pnote: "Price note: tap a price", tnote: "Time note: tap a bar", cmt: "Comment: tap where it goes", callout: "Callout: drag from the point to the text", flat: "Flat top/bottom: drag the first line", fibx: "Fib extension: drag A to B", prange: "Price range: press, drag, release", drange: "Date range: press, drag, release", dprange: "Date and price range: press, drag, release", long: "Long position: tap the entry", short: "Short position: tap the entry", brush: "Brush: press and draw", hlt: "Highlighter: press and draw", poly: "Polyline: tap points, double-tap to finish", ray: "Ray: press, drag, release", arrow: "Arrow: press, drag, release", vl: "Vertical line: tap a bar", txt: "Text: tap where it goes",
+const TOOL_HINT = { hr: "Horizontal ray: tap a point", disj: "Disjoint channel: drag the first line", info: "Info line: press, drag, release", ext: "Extended line: press, drag, release", amk: "Arrow marker: press, drag, release", amup: "Arrow mark up: tap a bar", amdn: "Arrow mark down: tap a bar", note: "Note: tap where it goes", pnote: "Price note: tap a price", tnote: "Time note: tap a bar", cmt: "Comment: tap where it goes", callout: "Callout: drag from the point to the text", flat: "Flat top/bottom: drag the first line", fibx: "Fib extension: drag A to B", prange: "Price range: press, drag, release", drange: "Date range: press, drag, release", dprange: "Date and price range: press, drag, release", long: "Long position: tap the entry", short: "Short position: tap the entry", brush: "Brush: press and draw", poly: "Polyline: tap points, double-tap to finish", ray: "Ray: press, drag, release", arrow: "Arrow: press, drag, release", vl: "Vertical line: tap a bar", txt: "Text: tap where it goes",
   cross: "Measure: press and drag on the chart",
   h: "Tap the chart to place a horizontal line",
   tl: "Trend line: drag from the start to the end",
@@ -1040,13 +1059,14 @@ function delSelected() {
   drawings = drawings.filter(o => o.id !== selDraw); selDraw = null; showSelbar(); saveDrawings();
 }
 const saveDrawings = () => LS.set("drawings", drawings);
-function addDrawing(o) { if (o.kind === "callout" && o.text == null) { const t = prompt("Text:"); if (!t) return; o.text = t; } o.id = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); drawings.push(o); selDraw = o.id; showSelbar(); saveDrawings(); }
+function addDrawing(o) { if (o.pid == null) o.pid = panels.indexOf(LP || main); if (o.kind === "callout" && o.text == null) { const t = prompt("Text:"); if (!t) return; o.text = t; } o.id = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); drawings.push(o); selDraw = o.id; showSelbar(); saveDrawings(); }
 const ptOf = m => { const d = dateMsOfT(m.T); return { date: d.date, ms: d.ms, p: m.p }; };
 
 function rel(p, e) { const r = p.cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
 
 function onDown(p, e) {
   if (!p.map || busy) return;
+  LP = p; if (tool === "brush" || tool === "poly") return;
   try { p.cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
   const pt = rel(p, e);
   ptrs.set(e.pointerId, { p, x: pt.x, y: pt.y });
@@ -1073,9 +1093,9 @@ function onDown(p, e) {
   }
   if (tool === "h") { const pr = pOfY(p, pt.y); addDrawing({ kind: "h", pts: [{ date: days[dayIdx].date, ms: 0, p: pr }] }); setTool(null); G = null; return; }
   if (TWO[tool] || THREE[tool]) {
-    if (THREE[tool] && pend && pend.stage === 2) { G.k = "chw"; setChannelThird(p, pt.x, pt.y); return; }
+    if (THREE[tool] && pend && pend.stage === 2) { if (tool === "disj") { const m2 = magnetPoint(p, pt.x, pt.y); pend.obj.pts[2] = pend.obj.pts[3] = ptOf(m2); G.k = "dj"; return; } G.k = "chw"; setChannelThird(p, pt.x, pt.y); return; }
     const m = magnetPoint(p, pt.x, pt.y);
-    pend = { kind: tool, stage: 1, obj: { id: "tmp", kind: tool, pts: [ptOf(m), ptOf(m)] } };
+    pend = { kind: tool, stage: 1, obj: { id: "tmp", kind: tool, pid: panels.indexOf(p), pts: [ptOf(m), ptOf(m)] } };
     G.k = "new"; return;
   }
   const th = tradeHit(p, pt.x, pt.y);
@@ -1095,6 +1115,7 @@ function setChannelThird(p, x, y) {
   pend.obj.pts[2] = ptOf(m);
 }
 function onMove(p, e) {
+  if (tool === "brush" || tool === "poly") return;
   const q = ptrs.get(e.pointerId); if (!q || !p.map) return;
   const pt = rel(p, e); q.x = pt.x; q.y = pt.y;
   if (ptrs.size === 2 && pinch) {
@@ -1121,6 +1142,7 @@ function onMove(p, e) {
     }
     case "new": pend.obj.pts[1] = ptOf(magnetPoint(p, pt.x, pt.y)); break;
     case "chw": setChannelThird(p, pt.x, pt.y); break;
+    case "dj": pend.obj.pts[3] = ptOf(magnetPoint(p, pt.x, pt.y)); break;
     case "trade": if (G.moved) dragTradeLine(p, G.th, pt.y); break;
     case "draw": if (G.moved) dragDrawing(p, pt); break;
     default: break;
@@ -1139,9 +1161,10 @@ function onUp(p, e, cancelled) {
       const a = pend.obj.pts[0], b = pend.obj.pts[1];
       const far = g.moved && Math.hypot(pt.x - g.sx, pt.y - g.sy) > 10;
       if (!far) { pend = null; break; }
-      if (THREE[pend.kind]) { pend.stage = 2; $("modetxt").textContent = pend.kind === "fx" || pend.kind === "fibx" ? "Press and drag to point C (end of the pullback)" : "Tap where the second line should go"; break; }
+      if (THREE[pend.kind]) { pend.stage = 2; $("modetxt").textContent = pend.kind === "disj" ? "Press and drag the second line" : pend.kind === "fx" || pend.kind === "fibx" ? "Press and drag to point C (end of the pullback)" : "Tap where the second line should go"; break; }
       const o = { kind: pend.kind, pts: [a, b] }; pend = null; addDrawing(o); setTool(null); break;
     }
+    case "dj": { const o = { kind: "disj", pts: pend.obj.pts.slice(0, 4) }; pend = null; addDrawing(o); setTool(null); break; }
     case "chw": {
       const o = { kind: pend.kind, pts: pend.obj.pts.slice(0, 3) }; pend = null; addDrawing(o); setTool(null); break;
     }
@@ -1353,7 +1376,7 @@ function drawTrades(p, ctx, y, pw, phc) {
   for (const t of trades) {
     if (t.date !== dayDate) continue;
     if (t.state === "pending" || t.state === "open" || t.state === "draft") {
-      if (S.showLines !== false) for (const L of tradeLines(t)) {
+      if (vTL(p)) for (const L of tradeLines(t)) {
         let yy = y(L.pr), out = 0;
         if (yy < 9) { yy = 9; out = -1; } else if (yy > phc - 9) { yy = phc - 9; out = 1; }
         if (!out) {
@@ -1367,7 +1390,7 @@ function drawTrades(p, ctx, y, pw, phc) {
         ctx.fillStyle = "#fff"; ctx.fillText(lab, 8, yy);
       }
     }
-    if (S.showHist !== false && t.state !== "draft" && t.openMs != null) drawFills(p, ctx, y, t);
+    if (vHI(p) && t.state !== "draft" && t.openMs != null) drawFills(p, ctx, y, t);
   }
 }
 function drawFills(p, ctx, y, t) {
@@ -1394,7 +1417,7 @@ function drawFills(p, ctx, y, t) {
 }
 // which trade line (if any) is under this pixel; the line must be on this panel
 function tradeHit(p, x, y) {
-  if (!p.map || S.showLines === false) return null;
+  if (!p.map || !vTL(p)) return null;
   let best = null, bd = 14;
   for (const t of live) {
     for (const L of tradeLines(t)) {
@@ -1487,7 +1510,7 @@ function renderCard() {
 }
 function wireCard() {
   const t = cardTrade, el = $("card"), q = id => el.querySelector("#" + id);
-  q("cX").onclick = closeCard;
+  q("cX").onclick = () => { $("card").hidden = true; cardTrade = null; };
   { const hd = el.querySelector(".chead"); let dg = null;
     hd.onpointerdown = e => { if (e.target.closest("button")) return; const r = el.getBoundingClientRect(); dg = { dx: e.clientX - r.left, dy: e.clientY - r.top }; hd.setPointerCapture(e.pointerId); };
     hd.onpointermove = e => { if (!dg) return; S.cardPos = { x: e.clientX - dg.dx, y: e.clientY - dg.dy }; applyCardPos(); };
@@ -1646,7 +1669,7 @@ function ringItems(level) {
       { ic: "›", t: "More", sub: "more2" }, { ic: "↩", t: "Back", sub: "root" }];
     case "more2": return [
       { ic: "⏩", t: "Latest day", f: () => goDay(days.length - 1) },
-      tog("ruleCheck", "✔", "Rule check"), { ic: "✎", t: "Edit rules", f: editRules },
+      
       back];
     default: return [
       { ic: playing ? "⏸" : "▶", t: playing ? "Pause" : "Play", f: togglePlay }, { ic: "⏭", t: "Next bar", f: nextBar },
@@ -1727,11 +1750,13 @@ function syncUI() {
 }
 function updateHud() {
   if (!days.length || !days[dayIdx]) return;
-  const arr = bars[main.tf], lb = arr && arr[arr.length - 1];
+  const arr = bars[main.tf], lb = arr && arr[arr.length - 1], pv = arr && arr[arr.length - 2], on = k => CFG[k] !== 0;
   const clk = clock >= SESSION_MS ? "16:15 closed" : fmtClock(clock);
-  $("hudMain").innerHTML = "<b>" + fmtDateLong(days[dayIdx].date) + "</b> · " + TF_LABEL[main.tf] + " " +
-    (lb && lb.d === dayIdx ? "O <b>" + lb.o.toFixed(2) + "</b> H <b>" + lb.h.toFixed(2) + "</b> L <b>" + lb.l.toFixed(2) + "</b> C <b>" + lb.c.toFixed(2) + "</b>" : "· press ▶ or ⏭ to start at 09:30") +
-    " · <b>" + clk + "</b> · " + speed + "x";
+  let h = on("sT") ? "<b>" + fmtDateLong(days[dayIdx].date) + "</b> · " + TF_LABEL[main.tf] + " " : "";
+  if (on("sV")) h += lb && lb.d === dayIdx ? "O <b>" + lb.o.toFixed(2) + "</b> H <b>" + lb.h.toFixed(2) + "</b> L <b>" + lb.l.toFixed(2) + "</b> C <b>" + lb.c.toFixed(2) + "</b>" : "· press ▶ or ⏭ to start at 09:30";
+  if (CFG.sC && lb && pv && lb.d === dayIdx) { const dd = lb.c - pv.c; h += " · " + (dd >= 0 ? "+" : "") + dd.toFixed(2) + " (" + (pv.c ? dd / pv.c * 100 : 0).toFixed(2) + "%)"; }
+  if (on("sM")) h += " · <b>" + clk + "</b>";
+  $("hudMain").innerHTML = h + " · " + speed + "x";
 }
 
 // ======================================================================
@@ -1855,21 +1880,20 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   get live() { return live; }, get drawings() { return drawings; }, get refs() { return refs; }, get lastPrice() { return lastPrice; }, S, days: () => days, get ready() { return days.length > 0 && !busy && !!bars[5]; },
   setMainTf, statsOf, placeDraft, newDraft, openCard, exitTrade, get tool() { return tool; }, extendHistory, get histN() { return histN; }, xOfT, yOfP, pOfY, tOfX };
 
-// ---------- website desk layout v3 ----------
+// ---------- website desk layout v4 ----------
 (function () {
   const E = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
-  const redraw = () => { for (const p of panels) drawPanel(p); };
+  S.ruleCheck = false;
+  const redraw = () => { for (const p of panels) drawPanel(p); updateHud(); };
   const hex6 = c => /^#[0-9a-f]{3}$/i.test(c) ? "#" + c[1] + c[1] + c[2] + c[2] + c[3] + c[3] : c;
   const saveCfg = () => { try { localStorage.setItem("bbb_cfg", JSON.stringify(CFG)); } catch (e) { /* ignore */ } };
+  const applyCfg = () => { document.body.classList.toggle("norail", !!CFG.rl); document.body.classList.toggle("nvA", CFG.nv === "a"); document.body.classList.toggle("nvO", CFG.nv === "o"); PAD = CFG.mr != null ? CFG.mr : 5; };
   const setC = (k, v) => { CFG[k] = v; saveCfg(); applyCfg(); redraw(); };
   const setSkin = k => { SKIN = k; TH = THEMES[k]; document.body.classList.toggle("dark", k !== "classic"); try { localStorage.setItem("bbb_skin", k); } catch (e) { /* ignore */ } redraw(); };
-  const applyCfg = () => document.body.classList.toggle("norail", !!CFG.rl);
   document.body.classList.toggle("dark", SKIN !== "classic"); applyCfg();
   const top = E("div"), rail = E("div"); top.id = "dtop"; rail.id = "drail"; document.body.append(top, rail);
   const B = (t, title, f, cls) => { const b = E("button", cls || "", t); b.title = title; b.onclick = f; return b; };
   const sep = () => E("span", "dsep");
-  const cardOpen = () => !$("card").hidden;
-  const toggleTrade = () => { if (cardOpen()) { $("card").hidden = true; cardTrade = null; } else openTradeCard(); };
   const shot = () => main.cv.toBlob(b => { const a = E("a"); a.href = URL.createObjectURL(b); a.download = "barbybar-" + (days[dayIdx] ? days[dayIdx].date : "chart") + ".png"; a.click(); });
   // ----- top bar
   const a = E("a", "", '<img src="icon-192.png" alt="">BarByBar'); a.href = "../"; a.title = "Back to the website"; top.append(a, sep());
@@ -1877,11 +1901,38 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   top.append(B("◀", "Previous day", () => goDay(dayIdx - 1)), dl, B("▶", "Next day", () => goDay(dayIdx + 1)), B("📅", "Pick a date", pickDate), B("⟲", "Restart the day", () => goDay(dayIdx)), sep());
   const tfs = E("select"); tfs.title = "Timeframe"; TFS.forEach(t => tfs.add(new Option(TF_LABEL[t], t))); tfs.onchange = () => setMainTf(+tfs.value); top.append(tfs, sep());
   const pl = B("▶ Play", "Play / pause", togglePlay); top.append(pl, B("⏭ Next bar", "Close this bar and go to the next", nextBar));
-  const sp = E("select"); sp.title = "Speed"; [1, 5, 10, 30, 60, 150, 400].forEach(v => sp.add(new Option(v + "x", v))); sp.onchange = () => { speed = +sp.value; S.speed = speed; saveSettings(); }; top.append(sp, E("span", "dsp"));
-  const rl = B("Rules", "Rule check on each trade", () => { S.ruleCheck = !S.ruleCheck; saveSettings(); syncUI(); });
-  top.append(rl, B("📈 Trade", "Trade window", toggleTrade, "acc"), B("📒 Journal", "Trade journal and stats", openReport), sep(), B("⚙", "Chart settings", () => openSettings(0)), B("📷", "Save a picture of the chart", shot), B("⛶", "Full screen", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()));
-  // ----- trade window: close button
-  new MutationObserver(() => { const c = $("card"); if (!c.hidden && !c.querySelector(".cx")) { const b = E("button", "cx", "✕"); b.title = "Close the window (trades stay)"; b.onclick = () => { c.hidden = true; cardTrade = null; }; c.prepend(b); } }).observe($("card"), { childList: true });
+  const sp = E("select"); sp.title = "Speed"; [1, 5, 10, 30, 60, 150, 400].forEach(v => sp.add(new Option(v + "x", v))); sp.onchange = () => { speed = +sp.value; S.speed = speed; saveSettings(); }; top.append(sp, sep());
+  const ib = B("ƒx Indicators ▾", "Indicators", e => { e.stopPropagation(); showInd(ib); }); top.append(ib, E("span", "dsp"));
+  const mb = B("Manage trades", "Open trades and orders", e => { e.stopPropagation(); showMtp(mb); });
+  top.append(B("📈 New trade", "Open the trade window for a new order", () => openTradeCard(), "acc"), mb, B("📒 Journal", "Trade journal and stats", openReport), sep(), B("⚙", "Chart settings", () => openSettings(0)), B("📷", "Save a picture of the chart", shot), B("⛶", "Full screen", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()));
+  // ----- indicators (EMA, ATR)
+  const ATR = () => CFG.atr || (CFG.atr = { on: 0, len: 14, sm: "rma", col: "#F5B642" });
+  const imenu = E("div"); imenu.id = "imenu"; imenu.hidden = true; document.body.append(imenu);
+  function showInd(btn) {
+    imenu.innerHTML = ""; const r = btn.getBoundingClientRect(); imenu.style.left = r.left + "px"; imenu.style.top = r.bottom + 6 + "px";
+    const e1 = E("button", "", "<span>" + (S.ema !== false ? "✓ " : "    ") + "EMA 20</span>"); e1.onclick = e => { e.stopPropagation(); S.ema = S.ema === false; saveSettings(); showInd(btn); };
+    const e2 = E("button", "", "<span>" + (ATR().on ? "✓ " : "    ") + "ATR (" + ATR().len + ")</span><span>⚙</span>"); e2.onclick = e => { e.stopPropagation(); if (e.target.textContent === "⚙") { imenu.hidden = true; openAtr(); } else { ATR().on = ATR().on ? 0 : 1; saveCfg(); showInd(btn); } };
+    imenu.append(e1, e2); imenu.hidden = false;
+  }
+  function openAtr() { const A = ATR(); shell("ATR settings", ["Inputs"], 0, () => { }, body => body.append(R("Length", num(A.len, v => { A.len = Math.max(1, Math.min(200, v || 14)); saveCfg(); }, 1, 200)), R("Smoothing", sel([["rma", "RMA (Wilder)"], ["sma", "SMA"], ["ema", "EMA"]], A.sm, v => { A.sm = v; saveCfg(); })), R("Show on the chart", chk(A.on, v => { A.on = v ? 1 : 0; saveCfg(); })), R("Label color", clr(A.col, v => { A.col = v; saveCfg(); })))); }
+  function atrOf(p) {
+    const arr = bars[p.tf]; if (!arr || arr.length < 3) return null; const A = ATR(), len = A.len || 14, n = arr.length, from = Math.max(1, n - len * 12 - 50), buf = [];
+    for (let i = from; i < n; i++) { const b = arr[i], pc = arr[i - 1].c; buf.push(Math.max(b.h - b.l, Math.abs(b.h - pc), Math.abs(b.l - pc))); }
+    if (A.sm === "sma") { const w = buf.slice(-len); return w.reduce((x, y) => x + y, 0) / w.length; }
+    const k = A.sm === "ema" ? 2 / (len + 1) : 1 / len; let v = buf[0]; for (let i = 1; i < buf.length; i++) v += (buf[i] - v) * k; return v;
+  }
+  // ----- manage trades
+  const mtp = E("div"); mtp.id = "mtp"; mtp.hidden = true; document.body.append(mtp); let mtpBtn = null;
+  function fillMtp() {
+    const L = live.filter(t => t.state === "open" || t.state === "pending"); const f = v => v == null || v === 0 ? "-" : (+v).toFixed(2);
+    let h = "<table><thead><tr><th>Side</th><th>Status</th><th>Entry</th><th>Stop</th><th>Target</th><th>Now</th><th>Left</th></tr></thead><tbody>";
+    L.forEach((t, i) => { const d = dirOf(t), risk = t.risk || Math.abs(t.entry - t.sl) || 1, r = t.state === "open" ? d * (lastPrice - t.entry) / risk : null;
+      h += '<tr data-i="' + i + '"><td class="' + (d > 0 ? "buy" : "sell") + '">' + (d > 0 ? "Buy" : "Sell") + '</td><td>' + (t.state === "open" ? "Open" : "Order (" + (t.type || "limit") + ")") + "</td><td>" + f(t.entry) + "</td><td>" + f(t.sl) + "</td><td>" + f(t.tp) + "</td><td>" + (r == null ? "-" : (r >= 0 ? "+" : "") + r.toFixed(2) + " R") + "</td><td>" + (t.state === "open" ? Math.round((t.remaining == null ? 1 : t.remaining) * 100) + "%" : "-") + "</td></tr>"; });
+    if (!L.length) h += '<tr><td colspan="7" style="color:#8CA0BA">No open trades or orders.</td></tr>';
+    mtp.innerHTML = h + "</tbody></table>"; mtp.querySelectorAll("tbody tr[data-i]").forEach(tr => tr.onclick = () => { mtp.hidden = true; openCard(L[+tr.dataset.i]); });
+  }
+  function showMtp(btn) { if (!mtp.hidden) { mtp.hidden = true; return; } mtpBtn = btn; const r = btn.getBoundingClientRect(); mtp.style.top = r.bottom + 6 + "px"; mtp.style.right = Math.max(8, innerWidth - r.right - 60) + "px"; fillMtp(); mtp.hidden = false; }
+  mtp.onclick = e => e.stopPropagation(); imenu.onclick = e => e.stopPropagation();
   // ----- cursor overlay
   let CUR = "cross", last = null; const xh = E("canvas"); xh.id = "xh"; document.body.append(xh);
   function xdraw(e) {
@@ -1904,12 +1955,13 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     }
   }
   addEventListener("pointermove", e => { last = e; xdraw(e); }, { passive: true }); document.addEventListener("mouseleave", () => xdraw(null));
-  // ----- free drawing flows: brush, highlighter, polyline
+  // ----- brush and polyline flows (the chart stays still while they are selected)
   let BR = null, PL = null;
   const hitPlot = (p, e) => { if (!p.map) return null; const r = p.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; return x >= 0 && y >= 0 && x < p.map.pw && y < p.map.ph ? { x, y } : null; };
   const pPt = (p, x, y) => ptOf({ T: tOfX(p, x), p: pOfY(p, y) });
   panels.forEach(p => p.cv.addEventListener("pointerdown", e => {
-    if (tool === "brush" || tool === "hlt") { const h = hitPlot(p, e); if (!h) return; e.stopImmediatePropagation(); BR = { p, lx: h.x, ly: h.y, o: { kind: tool, pts: [pPt(p, h.x, h.y)] } }; addDrawing(BR.o); }
+    if (e.button !== 0) return; LP = p;
+    if (tool === "brush") { const h = hitPlot(p, e); if (!h) return; e.stopImmediatePropagation(); BR = { p, lx: h.x, ly: h.y, o: { kind: "brush", pts: [pPt(p, h.x, h.y)] } }; addDrawing(BR.o); }
     else if (tool === "poly") { const h = hitPlot(p, e); if (!h) return; e.stopImmediatePropagation(); const pt = ptOf(magnetPoint(p, h.x, h.y)); if (!PL) { PL = { p, o: { kind: "poly", pts: [pt, pt] } }; addDrawing(PL.o); } else { PL.o.pts[PL.o.pts.length - 1] = pt; PL.o.pts.push(pt); } saveDrawings(); }
   }, true));
   addEventListener("pointermove", e => {
@@ -1920,35 +1972,34 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   const endPoly = () => { if (!PL) return; const q = PL.o.pts; q.pop(); while (q.length > 2 && q[q.length - 1].ms === q[q.length - 2].ms && q[q.length - 1].p === q[q.length - 2].p) q.pop(); PL = null; saveDrawings(); setTool(null); };
   addEventListener("dblclick", endPoly); addEventListener("keydown", e => { if (e.key === "Enter" || e.key === "Escape") endPoly(); });
   // ----- left rail
-  const SEC = (t) => ["#", t];
+  const SEC = t => ["#", t];
   const GR = [
     ["✛", "Cursor", [["Cross", "cur:cross"], ["Dot", "cur:dot"], ["Arrow", "cur:arrow"]]],
-    ["╱", "Lines", [SEC("Lines"), ["Trendline", "tl"], ["Ray", "ray"], ["Info line", "info"], ["Extended line", "ext"], ["Horizontal line", "h"], ["Horizontal ray", "hr"], ["Vertical line", "vl"], SEC("Channels"), ["Parallel channel", "ch"], ["Flat top/bottom", "flat"]]],
+    ["╱", "Lines", [SEC("Lines"), ["Trendline", "tl"], ["Ray", "ray"], ["Info line", "info"], ["Extended line", "ext"], ["Horizontal line", "h"], ["Horizontal ray", "hr"], ["Vertical line", "vl"], SEC("Channels"), ["Parallel channel", "ch"], ["Flat top/bottom", "flat"], ["Disjoint channel", "disj"]]],
     ["≣", "Fibonacci", [["Fib retracement", "fib"], ["Trend-based fib extension", "fibx"]]],
     ["⇅", "Forecasting and measurers", [SEC("Forecasting"), ["Long position", "long"], ["Short position", "short"], SEC("Measurers"), ["Price range", "prange"], ["Date range", "drange"], ["Date and price range", "dprange"]]],
-    ["✎", "Brushes, arrows, shapes", [SEC("Brushes"), ["Brush", "brush"], ["Highlighter", "hlt"], SEC("Arrows"), ["Arrow marker", "amk"], ["Arrow", "arrow"], ["Arrow mark up", "amup"], ["Arrow mark down", "amdn"], SEC("Shapes"), ["Rectangle", "rect"], ["Polyline", "poly"]]],
+    ["✎", "Brushes, arrows, shapes", [SEC("Brushes"), ["Brush", "brush"], SEC("Arrows"), ["Arrow marker", "amk"], ["Arrow", "arrow"], ["Arrow mark up", "amup"], ["Arrow mark down", "amdn"], SEC("Shapes"), ["Rectangle", "rect"], ["Polyline", "poly"]]],
     ["T", "Text and notes", [["Text", "txt"], ["Note", "note"], ["Price note", "pnote"], ["Time note", "tnote"], ["Callout", "callout"], ["Comment", "cmt"]]],
     ["📏", "Measure", [["Measure", "cross"]]]];
   const fly = E("div"); fly.id = "dfly"; fly.hidden = true; document.body.append(fly);
   const gb = GR.map(([ic, nm, it]) => {
     const b = E("button", "", ic); b.title = nm; b._it = it.filter(x => x[0] !== "#");
-    b.onclick = e => { e.stopPropagation(); const r = b.getBoundingClientRect(); fly.style.top = Math.min(r.top, innerHeight - 40 - it.length * 34) + "px"; fly.innerHTML = it[0][0] === "#" ? "" : "<i>" + nm + "</i>";
+    b.onclick = e => { e.stopPropagation(); const r = b.getBoundingClientRect(); fly.style.top = Math.max(50, Math.min(r.top, innerHeight - 40 - it.length * 34)) + "px"; fly.innerHTML = it[0][0] === "#" ? "" : "<i>" + nm + "</i>";
       it.forEach(([n, k]) => { if (n === "#") { fly.append(E("i", "h", k)); return; } const x = E("button", "", n); x.onclick = () => { fly.hidden = true; if (k.indexOf("cur:") === 0) { CUR = k.slice(4); setTool(null); xdraw(last); } else setTool(k); }; fly.append(x); }); fly.hidden = false; };
     rail.append(b); return b;
   });
-  document.addEventListener("click", () => { fly.hidden = true; cm.hidden = true; });
   rail.append(E("span", "dsp"));
   const toggleLock = () => { DLOCK = !DLOCK; lk.textContent = DLOCK ? "🔒" : "🔓"; lk.classList.toggle("on", DLOCK); };
   const toggleHide = () => { DHIDE = !DHIDE; hd.classList.toggle("on", DHIDE); redraw(); };
-  const clearAll = () => { if (confirm("Delete all drawings?")) { drawings = []; selDraw = null; showSelbar(); saveDrawings(); redraw(); } };
+  const clearAll = () => { if (confirm("Delete all drawings on this chart?")) { const pid = panels.indexOf(LP || main); drawings = drawings.filter(o => (o.pid == null ? panels.indexOf(main) : o.pid) !== pid); selDraw = null; showSelbar(); saveDrawings(); redraw(); } };
   const lk = B("🔓", "Lock all drawings", toggleLock), hd = B("👁", "Hide all drawings", toggleHide);
-  rail.append(lk, hd, B("🗑", "Delete all drawings", clearAll));
+  rail.append(lk, hd, B("🗑", "Delete the drawings of the chart you used last", clearAll));
   // ----- drawing settings
-  const NM = { h: "Horizontal line", hr: "Horizontal ray", vl: "Vertical line", tl: "Trendline", ray: "Ray", info: "Info line", ext: "Extended line", arrow: "Arrow", amk: "Arrow marker", amup: "Arrow mark up", amdn: "Arrow mark down", rect: "Rectangle", ch: "Parallel channel", flat: "Flat top/bottom", fib: "Fib retracement", fibx: "Fib extension", fx: "Measured move", long: "Long position", short: "Short position", prange: "Price range", drange: "Date range", dprange: "Date and price range", brush: "Brush", hlt: "Highlighter", poly: "Polyline", txt: "Text", note: "Note", pnote: "Price note", tnote: "Time note", callout: "Callout", cmt: "Comment" };
+  const NM = { h: "Horizontal line", hr: "Horizontal ray", vl: "Vertical line", tl: "Trendline", ray: "Ray", info: "Info line", ext: "Extended line", arrow: "Arrow", amk: "Arrow marker", amup: "Arrow mark up", amdn: "Arrow mark down", rect: "Rectangle", ch: "Parallel channel", flat: "Flat top/bottom", disj: "Disjoint channel", fib: "Fib retracement", fibx: "Fib extension", fx: "Measured move", long: "Long position", short: "Short position", prange: "Price range", drange: "Date range", dprange: "Date and price range", brush: "Brush", poly: "Polyline", txt: "Text", note: "Note", pnote: "Price note", tnote: "Time note", callout: "Callout", cmt: "Comment" };
   const LN = [["col", "Line color", "color"], ["w", "Thickness", "w"], ["dash", "Line style", "dash"]];
   const FL = LN.concat([["fcol", "Fill color", "color"], ["op", "Fill opacity", "op", 12]]);
   const TXF = [["text", "Text", "text"], ["col", "Color", "color"], ["sz", "Font size", "sz"]];
-  const F = { h: LN.concat([["lab", "Show price label", "bool", 1]]), hr: LN, vl: LN, arrow: LN, amk: LN, amup: LN.slice(0, 1), amdn: LN.slice(0, 1), fx: LN, tl: LN.concat([["ext", "Extend", "ext", "LR"], ["arr", "Arrow at the end", "bool", 0]]), info: LN.concat([["ext", "Extend", "ext", "LR"]]), ray: LN.concat([["ext", "Extend", "ext", "L"]]), ext: LN, rect: FL.concat([["ext", "Extend", "ext", "LR"]]), prange: FL, drange: FL, dprange: FL, ch: LN.concat([["op", "Fill opacity", "op", 7]]), flat: LN.concat([["op", "Fill opacity", "op", 8]]), fibx: LN.concat([["lab", "Show level values", "bool", 0], ["ext", "Extend", "ext", "R"]]), long: LN.slice(0, 2), short: LN.slice(0, 2), brush: LN.slice(0, 2), hlt: LN.slice(0, 2), poly: LN, txt: TXF, note: TXF, pnote: TXF, tnote: TXF, callout: TXF, cmt: TXF, fib: [] };
+  const F = { h: LN.concat([["lab", "Show price label", "bool", 1]]), hr: LN, vl: LN, arrow: LN, amk: LN, amup: LN.slice(0, 1), amdn: LN.slice(0, 1), fx: LN, tl: LN.concat([["ext", "Extend", "ext", "LR"], ["arr", "Arrow at the end", "bool", 0]]), info: LN.concat([["ext", "Extend", "ext", "LR"]]), ray: LN.concat([["ext", "Extend", "ext", "L"]]), ext: LN, rect: FL.concat([["ext", "Extend", "ext", "LR"]]), prange: FL, drange: FL, dprange: FL, ch: LN.concat([["ext", "Extend", "ext", "LR"], ["op", "Fill opacity", "op", 7]]), flat: LN.concat([["op", "Fill opacity", "op", 8]]), disj: LN.concat([["op", "Fill opacity", "op", 7]]), fibx: LN.concat([["lab", "Show level values", "bool", 0], ["ext", "Extend", "ext", "R"]]), long: LN.slice(0, 2), short: LN.slice(0, 2), brush: LN.slice(0, 2), poly: LN, txt: TXF, note: TXF, pnote: TXF, tnote: TXF, callout: TXF, cmt: TXF, fib: [] };
   const objSel = () => drawings.find(o => o.id === selDraw);
   const setSt = (o, k, v) => { o.st = o.st || {}; o.st[k] = v; saveDrawings(); redraw(); };
   const R = (lab, ...els) => { const r = E("label", "drow", "<span>" + lab + "</span>"), w = E("span", "dr"); w.append(...els); r.append(w); return r; };
@@ -1965,8 +2016,8 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     if (ty === "bool") return R(lab, chk(v == null ? d : v, x => setSt(o, k, x ? 1 : 0)));
     if (ty === "op") return R(lab, (() => { const el = E("input"); el.type = "range"; el.min = 0; el.max = 100; el.value = v == null ? d : Math.round(v * 100); el.oninput = () => setSt(o, k, el.value / 100); return el; })());
     if (ty === "text") return R(lab, (() => { const el = E("input"); el.type = "text"; el.value = o.text || ""; el.oninput = () => { o.text = el.value; saveDrawings(); redraw(); }; return el; })());
-    const cur = st.extL && st.extR ? "LR" : st.extL ? "L" : st.extR ? "R" : "";       // extend
-    const opts = [["", "Don't extend"]]; if (d.indexOf("L") >= 0) opts.push(["L", "Extend left"]); if (d.indexOf("R") >= 0) opts.push(["R", "Extend right"]); if (d === "LR") opts.push(["LR", "Extend both"]);
+    const cur = st.extL && st.extR ? "LR" : st.extL ? "L" : st.extR ? "R" : "", opts = [["", "Don't extend"]];
+    if (d.indexOf("L") >= 0) opts.push(["L", "Extend left"]); if (d.indexOf("R") >= 0) opts.push(["R", "Extend right"]); if (d === "LR") opts.push(["LR", "Extend both"]);
     return R(lab, sel(opts, cur, x => { o.st = o.st || {}; o.st.extL = x.indexOf("L") >= 0 ? 1 : 0; o.st.extR = x.indexOf("R") >= 0 ? 1 : 0; saveDrawings(); redraw(); }));
   }
   function fibStyle(o, body) {
@@ -1976,7 +2027,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     body.append(R("Use one color", chk(st.one, x => setSt(o, "one", x ? 1 : 0)), clr(st.col || TH.pc, x => { st.col = x; setSt(o, "one", 1); })), R("Background", chk(st.bg, x => setSt(o, "bg", x ? 1 : 0)), (() => { const el = E("input"); el.type = "range"; el.min = 0; el.max = 100; el.value = Math.round((st.op ?? .08) * 100); el.oninput = () => setSt(o, "op", el.value / 100); return el; })()), R("Show level values", chk(st.lab, x => setSt(o, "lab", x ? 1 : 0))));
     LN.slice(1).forEach(f => body.append(field(o, f)));
   }
-  const dlg = E("div"); dlg.id = "ddlg"; dlg.hidden = true; document.body.append(dlg); let tab = 0, dMode = "obj", sTab = 0;
+  const dlg = E("div"); dlg.id = "ddlg"; dlg.hidden = true; document.body.append(dlg); let tab = 0, sTab = 0;
   dlg.onclick = e => { if (e.target === dlg) dlg.hidden = true; };
   function shell(title, names, cur, go, fill) {
     dlg.innerHTML = ""; dlg.hidden = false; const box = E("div", "dbox"), hh = E("div", "dhd", "<b>" + title + "</b>"), tabs = E("div", "dtabs"), body = E("div", "dbody");
@@ -1990,20 +2041,33 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
       else TFS.forEach(t => body.append(R(TF_LABEL[t], chk(!o.st || !o.st.vis || o.st.vis.indexOf(t) >= 0, x => { const set = new Set((o.st && o.st.vis) || TFS); if (x) set.add(t); else set.delete(t); setSt(o, "vis", set.size === TFS.length ? null : Array.from(set)); }))));
     });
   }
-  // ----- chart settings
-  const TG = [["nums", "Bar numbers (5m)"], ["refs", "Prior day, week and month lines"], ["multi", "Three-chart layout"], ["showHist", "Trade history marks"], ["showLines", "Live trade lines"], ["ruleCheck", "Rule check on each trade"]];
+  // ----- chart settings: Symbol, Status line, Scales and lines, Canvas, Display
+  const on1 = k => CFG[k] !== 0, st01 = k => v => setC(k, v ? 1 : 0);
   function openSettings(i) {
-    sTab = i; shell("Chart settings", ["Symbol", "Canvas", "Display"], sTab, k => openSettings(k), body => {
+    sTab = i; shell("Chart settings", ["Symbol", "Status line", "Scales and lines", "Canvas", "Display"], sTab, k => openSettings(k), body => {
       if (sTab === 0) {
-        body.append(R("Color theme", sel([["classic", "Classic (light)"], ["modern", "Modern (dark)"], ["blind", "Color-blind (dark)"]], SKIN, v => { setSkin(v); openSettings(0); })), R("Color bars based on previous close", chk(CFG.pc, v => setC("pc", v ? 1 : 0))));
-        [["Body", "bod", "bu", "bdn", TH.up, TH.dn], ["Borders", "bor", "ru", "rd", TH.up, TH.dn], ["Wick", "wk", "wu", "wd", TH.up, TH.dn]].forEach(([n, on, u, d, du, dd]) => body.append(R(n, chk(CFG[on], v => setC(on, v ? 1 : 0)), clr(CFG[u] || du, v => setC(u, v)), clr(CFG[d] || dd, v => setC(d, v)))));
+        body.append(R("Color theme", sel([["classic", "Classic (light)"], ["modern", "Modern (dark)"], ["blind", "Color-blind (dark)"]], SKIN, v => { setSkin(v); openSettings(0); })), R("Color bars based on previous close", chk(CFG.pc, st01("pc"))));
+        [["Body", "bod", "bu", "bdn"], ["Borders", "bor", "ru", "rd"], ["Wick", "wk", "wu", "wd"]].forEach(([n, o, u, d]) => body.append(R(n, chk(CFG[o], st01(o)), clr(CFG[u] || TH.up, v => setC(u, v)), clr(CFG[d] || TH.dn, v => setC(d, v)))));
       } else if (sTab === 1) {
-        body.append(R("Background", clr(CFG.bgc || TH.w, v => setC("bgc", v)), B("Reset", "Use the theme background", () => { delete CFG.bgc; saveCfg(); redraw(); openSettings(1); })),
-          R("Vertical grid lines", chk(CFG.gv, v => setC("gv", v ? 1 : 0))), R("Horizontal grid lines", chk(CFG.gh, v => setC("gh", v ? 1 : 0))),
-          R("Grid color and style", clr(CFG.gc || "#2a3b57", v => setC("gc", v)), sel(DSH, CFG.gs == null ? 1 : CFG.gs, v => setC("gs", +v))),
-          R("Crosshair", clr(CFG.xc || TH.k, v => setC("xc", v)), sel(DSH, CFG.xs == null ? 1 : CFG.xs, v => setC("xs", +v))),
-          R("Watermark", chk(CFG.wm, v => setC("wm", v ? 1 : 0))), R("Hide drawing rail", chk(CFG.rl, v => setC("rl", v ? 1 : 0))));
-      } else TG.forEach(([k, n]) => body.append(R(n, chk(S[k], v => { S[k] = !!v; saveSettings(); syncUI(); if (k === "multi") for (const p of panels) p.off = 0; }))));
+        body.append(R("Title (date and timeframe)", chk(on1("sT"), st01("sT"))), R("Open market status (clock)", chk(on1("sM"), st01("sM"))), R("Chart values (O H L C)", chk(on1("sV"), st01("sV"))), R("Bar change values", chk(CFG.sC, st01("sC"))),
+          R("Indicator titles", chk(on1("it"), st01("it"))), R("Indicator inputs", chk(on1("ii"), st01("ii"))), R("Indicator values", chk(on1("iv"), st01("iv"))));
+      } else if (sTab === 2) {
+        body.append(R("Symbol label color", chk(CFG.sl, st01("sl")), clr(CFG.slu || TH.up, v => setC("slu", v)), clr(CFG.sld || TH.dn, v => setC("sld", v))),
+          R("Indicators and financials", sel([["v", "Value"], ["n", "Name"], ["nv", "Name and value"]], on1("it") && on1("iv") ? "nv" : on1("it") ? "n" : "v", v => { CFG.it = v.indexOf("n") >= 0 ? 1 : 0; CFG.iv = v.indexOf("v") >= 0 ? 1 : 0; saveCfg(); redraw(); }))),
+        body.append(R("High and low", sel([["0", "Hidden"], ["1", "Lines"]], CFG.hl ? "1" : "0", v => setC("hl", +v)), clr(CFG.hlc || TH.k, v => setC("hlc", v))),
+          R("Previous day close price label", chk(CFG.pdt, st01("pdt"))), R("Previous day close price line", chk(CFG.pdl, st01("pdl"))),
+          R("Day of week on labels", chk(on1("dw"), st01("dw"))), R("Date format", sel([["0", "Mon 29 Sep"], ["1", "2019-09-29"], ["2", "29/09/2019"], ["3", "Mon 29 Sep '19"]], String(CFG.df || 0), v => setC("df", +v))), R("Time hours format", sel([["0", "24-hours"], ["1", "12-hours"]], CFG.h12 ? "1" : "0", v => setC("h12", +v))));
+      } else if (sTab === 3) {
+        body.append(R("Background", clr(CFG.bgc || TH.w, v => setC("bgc", v)), B("Reset", "Use the theme background", () => { delete CFG.bgc; saveCfg(); redraw(); openSettings(3); })),
+          R("Vertical grid lines", chk(CFG.gv, st01("gv"))), R("Horizontal grid lines", chk(CFG.gh, st01("gh"))), R("Grid color and style", clr(CFG.gc || "#2a3b57", v => setC("gc", v)), sel(DSH, CFG.gs == null ? 1 : CFG.gs, v => setC("gs", +v))),
+          R("Crosshair", clr(CFG.xc || TH.k, v => setC("xc", v)), sel(DSH, CFG.xs == null ? 1 : CFG.xs, v => setC("xs", +v))), R("Watermark", chk(CFG.wm, st01("wm"))),
+          R("Scale text", clr(CFG.tc || TH.k, v => setC("tc", v)), num(CFG.ts || 11, v => setC("ts", v || 11), 8, 20)), R("Scale lines", clr(CFG.lc || TH.k, v => setC("lc", v)), sel(DSH, CFG.ls || 0, v => setC("ls", +v))),
+          R("Navigation buttons", sel([["h", "Visible on mouse over"], ["a", "Always visible"], ["o", "Hidden"]], CFG.nv || "h", v => setC("nv", v))), R("Hide drawing rail", chk(CFG.rl, st01("rl"))),
+          R("Margin top (%)", num(CFG.mt != null ? CFG.mt : 8, v => setC("mt", v), 0, 40)), R("Margin bottom (%)", num(CFG.mb != null ? CFG.mb : 8, v => setC("mb", v), 0, 40)), R("Margin right (bars)", num(CFG.mr != null ? CFG.mr : 5, v => setC("mr", v), 0, 60)));
+      } else {
+        [["nums", "Bar numbers (5m)"], ["refs", "Prior day, week and month lines"], ["multi", "Three-chart layout"]].forEach(([k, n]) => body.append(R(n, chk(S[k], v => { S[k] = !!v; saveSettings(); syncUI(); if (k === "multi") for (const p of panels) p.off = 0; }))));
+        body.append(R("Trade lines (all charts)", chk(S.showLines !== false, v => { S.showLines = !!v; panels.forEach(p => { p.tl = null; }); saveSettings(); redraw(); })), R("Trade history (all charts)", chk(S.showHist !== false, v => { S.showHist = !!v; panels.forEach(p => { p.hi2 = null; }); saveSettings(); redraw(); })));
+      }
     });
   }
   // ----- quick properties bar
@@ -2022,32 +2086,41 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   }
   // ----- right-click menu
   const cm = E("div"); cm.id = "cmenu"; cm.hidden = true; document.body.append(cm);
+  document.addEventListener("click", () => { fly.hidden = true; cm.hidden = true; imenu.hidden = true; mtp.hidden = true; });
   document.addEventListener("contextmenu", e => {
     if (!document.body.classList.contains("desk")) return;
     const p = panels.find(q => { if (!q.map) return false; const r = q.cv.getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; });
-    if (!p) return; e.preventDefault(); if (tool) setTool(null);
+    if (!p) return; e.preventDefault(); if (tool) setTool(null); LP = p;
     const r = p.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, inPlot = x < p.map.pw && y < p.map.ph, dh = inPlot ? drawHit(p, x, y) : null;
     if (dh) { selDraw = dh.o.id; showSelbar(); }
-    const price = inPlot ? pOfY(p, y) : null, it = [];
+    const price = inPlot ? pOfY(p, y) : null, it = [], ck = (v, n) => (v ? "✓  " : "      ") + n;
     if (dh) it.push([(NM[dh.o.kind] || "Drawing") + " settings…", () => { tab = 0; openDlg(); }], ["Clone", cloneSel], ["Delete", delSel], "-");
-    it.push([(cardOpen() ? "Close" : "Open") + " trade window", toggleTrade], "-");
-    TG.slice(0, 5).forEach(([k, n]) => it.push([(S[k] ? "✓  " : "      ") + n, () => { S[k] = !S[k]; saveSettings(); syncUI(); if (k === "multi") for (const q of panels) q.off = 0; }]));
-    it.push("-");
+    it.push(["New trade…", () => openTradeCard()], ["Manage trades", () => showMtp(mb)], "-");
+    it.push([ck(S.nums, "Bar numbers"), () => { S.nums = !S.nums; saveSettings(); syncUI(); }], [ck(S.refs, "Prior day, week and month lines"), () => { S.refs = !S.refs; saveSettings(); syncUI(); }], [ck(S.multi, "3 charts"), () => { S.multi = !S.multi; saveSettings(); syncUI(); for (const q of panels) q.off = 0; }],
+      [ck(vHI(p), "Trade history (this chart)"), () => { p.hi2 = !vHI(p); redraw(); }], [ck(vTL(p), "Trade lines (this chart)"), () => { p.tl = !vTL(p); redraw(); }], "-");
     if (price != null) it.push(["Add horizontal line at " + price.toFixed(2), () => addDrawing({ kind: "h", pts: [{ date: days[dayIdx].date, ms: 0, p: price }] })], ["Copy price " + price.toFixed(2), () => { if (navigator.clipboard) navigator.clipboard.writeText(price.toFixed(2)); }]);
-    it.push([DLOCK ? "Unlock drawings" : "Lock drawings", toggleLock], [DHIDE ? "Show drawings" : "Hide drawings", toggleHide], ["Remove all drawings", clearAll], "-", ["Reset chart view", () => { p.off = 0; p.vz = 1; p.vo = 0; p.fix = null; }], ["Save picture", shot], ["Chart settings…", () => openSettings(0)]);
+    it.push([DLOCK ? "Unlock drawings" : "Lock drawings", toggleLock], [DHIDE ? "Show drawings" : "Hide drawings", toggleHide], ["Remove drawings of this chart", clearAll], "-", ["Reset chart view", () => { p.off = 0; p.vz = 1; p.vo = 0; p.fix = null; }], ["Save picture", shot], ["Chart settings…", () => openSettings(0)]);
     cm.innerHTML = ""; it.forEach(q => { if (q === "-") { cm.append(E("hr")); return; } const b = E("button", "", "<span>" + q[0] + "</span>"); b.onclick = () => { cm.hidden = true; q[1](); }; cm.append(b); });
-    cm.hidden = false; cm.style.left = Math.min(e.clientX, innerWidth - 250) + "px"; cm.style.top = Math.min(e.clientY, innerHeight - cm.offsetHeight - 8) + "px";
+    cm.hidden = false; cm.style.left = Math.min(e.clientX, innerWidth - 270) + "px"; cm.style.top = Math.max(4, Math.min(e.clientY, innerHeight - cm.offsetHeight - 8)) + "px";
   }, true);
+  // ----- per-chart navigation buttons and indicator labels
+  panels.forEach(p => {
+    const box = p.cv.parentElement, n = E("div", "nav"), z = f => () => { p.visMap[p.tf] = clamp(Math.round(p.visMap[p.tf] * f), 8, 300); };
+    [["−", "Zoom out", z(1.25)], ["+", "Zoom in", z(.8)], ["⏭", "Go to the latest bar", () => { p.off = 0; }]].forEach(([t, ti, f]) => n.append(B(t, ti, f)));
+    box.append(n); p._ind = E("div", "ind"); box.append(p._ind);
+  });
+  function indText(p) { const A = ATR(); if (!A.on) return ""; const v = atrOf(p); if (v == null) return ""; return (on1("it") ? "ATR" : "") + (on1("ii") ? "(" + A.len + ")" : "") + (on1("iv") ? " " + v.toFixed(2) : ""); }
   // ----- sync
   function upd() {
     const on = innerWidth >= 900 && matchMedia("(pointer:fine)").matches || /[?&]desk=1/.test(location.search);
-    document.body.classList.toggle("desk", on); if (!on) { props(); return; }
+    document.body.classList.toggle("desk", on); S.ruleCheck = false;
+    panels.forEach(p => { if (p._ind) { p._ind.textContent = indText(p); p._ind.style.color = ATR().col; } });
+    if (!on) { props(); return; }
     dl.textContent = days[dayIdx] ? days[dayIdx].date : ""; pl.textContent = playing ? "⏸ Pause" : "▶ Play"; pl.classList.toggle("on", !!playing);
-    tfs.value = main.tf; sp.value = speed; rl.classList.toggle("on", !!S.ruleCheck);
-    gb.forEach(b => b.classList.toggle("on", b._it.some(x => x[1] === tool))); gb[0].textContent = { cross: "✛", dot: "•", arrow: "➤" }[CUR];
-    props();
+    tfs.value = main.tf; sp.value = speed; gb.forEach(b => b.classList.toggle("on", b._it.some(x => x[1] === tool))); gb[0].textContent = { cross: "✛", dot: "•", arrow: "➤" }[CUR];
+    if (!mtp.hidden) fillMtp(); props();
   }
-  setInterval(upd, 250); addEventListener("resize", upd); upd();
+  setInterval(upd, 400); addEventListener("resize", upd); upd();
 })();
 </script>
 </body>
