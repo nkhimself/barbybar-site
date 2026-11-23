@@ -236,7 +236,7 @@ const DATA_BASE = (() => {
   if (q) return q.endsWith("/") ? q : q + "/";
   return "https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/";
 })();
-const VER = "4.9.0";
+const VER = "4.9.1";
 let LP = null;
 const dOn = (o, p) => (o.pid == null ? panels.indexOf(main) : o.pid) === panels.indexOf(p);
 const vTL = p => p.tl != null ? p.tl : S.showLines !== false, vHI = p => p.hi2 != null ? p.hi2 : S.showHist !== false;
@@ -865,11 +865,13 @@ function drawObj(p, ctx, o, sel) {
       const pct = v => (e ? v / e * 100 : 0).toFixed(3), pnl = lastPrice != null ? dir * (lastPrice - e) : null, rr = sp ? (tp / sp).toFixed(2) : "-";
       posTag(ctx, cx, yT + (yT < yE ? -17 : 17), ["Target: " + tp.toFixed(2) + " (" + pct(tp) + "%)"], "#089981");
       posTag(ctx, cx, yS + (yS > yE ? 17 : -17), ["Stop: " + sp.toFixed(2) + " (" + pct(sp) + "%)"], "#f23645");
-      posTag(ctx, cx, yE, ["Open P&L: " + (pnl == null ? "-" : (pnl >= 0 ? "+" : "") + pnl.toFixed(2) + " pts" + (sp ? " (" + (pnl / sp).toFixed(2) + " R)" : "")), "Risk/reward ratio: " + rr], pnl != null && pnl < 0 ? "#f23645" : "#089981");
+      posTag(ctx, cx, yE, ["Open P&L: " + (pnl == null ? "-" : (pnl >= 0 ? "+" : "") + pnl.toFixed(2) + " pts"), "Risk/reward ratio: " + rr], pnl != null && pnl < 0 ? "#f23645" : "#089981");
     }
   } else if (o.kind === "flat") {
     const yF = P[2].y; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(P[0].x, yF); ctx.lineTo(P[1].x, yF); ctx.stroke();
     ctx.globalAlpha = st.op ?? 0.08; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[1].x, yF); ctx.lineTo(P[0].x, yF); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+  } else if (o.kind === "fibx" && P.length < 3) {
+    ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke();
   } else if (o.kind === "fibx") {
     const dP = o.pts[1].p - o.pts[0].p, xl = P[2].x, xr = st.extR ? pw : fxRight(P);
     ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[2].x, P[2].y); ctx.stroke(); ctx.setLineDash(DASH[st.dash] || []);
