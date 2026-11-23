@@ -236,7 +236,7 @@ const DATA_BASE = (() => {
   if (q) return q.endsWith("/") ? q : q + "/";
   return "https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/";
 })();
-const VER = "4.8.0";
+const VER = "4.9.0";
 let LP = null;
 const dOn = (o, p) => (o.pid == null ? panels.indexOf(main) : o.pid) === panels.indexOf(p);
 const vTL = p => p.tl != null ? p.tl : S.showLines !== false, vHI = p => p.hi2 != null ? p.hi2 : S.showHist !== false;
@@ -245,7 +245,8 @@ let SKIN = (function () { try { return localStorage.getItem("bbb_skin"); } catch
 if (!THEMES[SKIN]) SKIN = "classic";
 let TH = THEMES[SKIN], DHIDE = false, DLOCK = false;
 const ONE = { hr: 1, vl: 1, txt: 1, note: 1, pnote: 1, tnote: 1, cmt: 1, amup: 1, amdn: 1, long: 1, short: 1 }, TXT = { txt: 1, note: 1, pnote: 1, tnote: 1, cmt: 1 };
-const TWO = { tl: 1, ray: 1, info: 1, ext: 1, arrow: 1, amk: 1, rect: 1, fib: 1, prange: 1, drange: 1, dprange: 1, callout: 1 }, THREE = { disj: 1, ch: 1, flat: 1, fx: 1, fibx: 1 }, MEAS = { prange: 1, drange: 1, dprange: 1 };
+const TWO = { ch: 1, tl: 1, ray: 1, info: 1, ext: 1, arrow: 1, amk: 1, rect: 1, fib: 1, prange: 1, drange: 1, dprange: 1, callout: 1 }, THREE = { fx: 1, fibx: 1 }, MEAS = { prange: 1, drange: 1, dprange: 1 };
+const CHD = [[-0.25, "", 0, 0], [0, "", 0, 1], [0.25, "", 0, 0], [0.5, "", 1, 1], [0.75, "", 0, 0], [1, "", 0, 1], [1.25, "", 0, 0]];
 const FIBD = [[0, "#787b86", 1], [0.236, "#f23645", 0], [0.382, "#ff9800", 0], [0.5, "#4caf50", 1], [0.618, "#089981", 0], [0.786, "#00bcd4", 0], [1, "#787b86", 1], [1.618, "#2962ff", 0], [2.618, "#f23645", 0], [3.618, "#9c27b0", 0], [4.236, "#e91e63", 0]];
 let CFG = (function () { try { return JSON.parse(localStorage.getItem("bbb_cfg") || "{}"); } catch (e) { return {}; } })();
 const DASH = { 1: [6, 4], 2: [1.5, 3.5] };
@@ -808,6 +809,12 @@ function chPrice2(o) {           // channel: parallel line through the third poi
   const slope = (b.p - a.p) / (tb - ta);
   return c.p - (a.p + slope * (tc - ta));      // vertical offset of the second line
 }
+function posTag(ctx, cx, y, lines, fill) {
+  ctx.font = "600 11px system-ui,sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const w = Math.max.apply(null, lines.map(t => ctx.measureText(t).width)) + 16, h = lines.length * 15 + 8;
+  ctx.fillStyle = fill; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(cx - w / 2, y - h / 2, w, h, 5); else ctx.rect(cx - w / 2, y - h / 2, w, h); ctx.fill();
+  ctx.fillStyle = "#fff"; lines.forEach((t, i) => ctx.fillText(t, cx, y - h / 2 + 11.5 + i * 15));
+}
 function noteBox(ctx, x, y, t, fill, fg) {
   ctx.font = "600 12px system-ui,sans-serif"; const w = ctx.measureText(t).width + 14, h = 22;
   ctx.fillStyle = fill; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y - h / 2, w, h, 6); else ctx.rect(x, y - h / 2, w, h); ctx.fill();
@@ -849,10 +856,17 @@ function drawObj(p, ctx, o, sel) {
   } else if (o.kind === "amup" || o.kind === "amdn") {
     const x = P[0].x, y = P[0].y, g = o.kind === "amup" ? 1 : -1; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 8, y + 12 * g); ctx.lineTo(x - 3, y + 12 * g); ctx.lineTo(x - 3, y + 26 * g); ctx.lineTo(x + 3, y + 26 * g); ctx.lineTo(x + 3, y + 12 * g); ctx.lineTo(x + 8, y + 12 * g); ctx.closePath(); ctx.fill();
   } else if (o.kind === "long" || o.kind === "short") {
-    const x0 = P[0].x, x1 = Math.max(P[3].x, x0 + 10), yE = P[0].y, yS = P[1].y, yT = P[2].y, rk = Math.abs(o.pts[0].p - o.pts[1].p), rw = Math.abs(o.pts[2].p - o.pts[0].p);
-    ctx.globalAlpha = .2; ctx.fillStyle = "#2EC4A6"; ctx.fillRect(x0, Math.min(yE, yT), x1 - x0, Math.abs(yT - yE)); ctx.fillStyle = "#F0707A"; ctx.fillRect(x0, Math.min(yE, yS), x1 - x0, Math.abs(yS - yE)); ctx.globalAlpha = 1;
-    ctx.beginPath(); ctx.moveTo(x0, yE); ctx.lineTo(x1, yE); ctx.stroke(); ctx.fillStyle = col; ctx.font = "600 11px system-ui,sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.fillText((o.kind === "long" ? "Long" : "Short") + "  R:R " + (rk ? (rw / rk).toFixed(2) : "-") + "  risk " + rk.toFixed(2) + "  reward " + rw.toFixed(2), x0 + 5, yE + (yE < yT ? 10 : -10));
+    const x0 = P[0].x, x1 = Math.max(P[3].x, x0 + 10), cx = (x0 + x1) / 2, yE = P[0].y, yS = P[1].y, yT = P[2].y, e = o.pts[0].p, dir = o.kind === "long" ? 1 : -1;
+    const tp = Math.abs(o.pts[2].p - e), sp = Math.abs(e - o.pts[1].p);
+    ctx.fillStyle = "rgba(38,166,154,.22)"; ctx.fillRect(x0, Math.min(yE, yT), x1 - x0, Math.abs(yT - yE));
+    ctx.fillStyle = "rgba(242,54,69,.22)"; ctx.fillRect(x0, Math.min(yE, yS), x1 - x0, Math.abs(yS - yE));
+    ctx.lineWidth = 1; [[yT, "#089981"], [yS, "#f23645"], [yE, TH.k]].forEach(([yy, c]) => { ctx.strokeStyle = c; ctx.beginPath(); ctx.moveTo(x0, yy); ctx.lineTo(x1, yy); ctx.stroke(); });
+    if (sel) {
+      const pct = v => (e ? v / e * 100 : 0).toFixed(3), pnl = lastPrice != null ? dir * (lastPrice - e) : null, rr = sp ? (tp / sp).toFixed(2) : "-";
+      posTag(ctx, cx, yT + (yT < yE ? -17 : 17), ["Target: " + tp.toFixed(2) + " (" + pct(tp) + "%)"], "#089981");
+      posTag(ctx, cx, yS + (yS > yE ? 17 : -17), ["Stop: " + sp.toFixed(2) + " (" + pct(sp) + "%)"], "#f23645");
+      posTag(ctx, cx, yE, ["Open P&L: " + (pnl == null ? "-" : (pnl >= 0 ? "+" : "") + pnl.toFixed(2) + " pts" + (sp ? " (" + (pnl / sp).toFixed(2) + " R)" : "")), "Risk/reward ratio: " + rr], pnl != null && pnl < 0 ? "#f23645" : "#089981");
+    }
   } else if (o.kind === "flat") {
     const yF = P[2].y; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(P[0].x, yF); ctx.lineTo(P[1].x, yF); ctx.stroke();
     ctx.globalAlpha = st.op ?? 0.08; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[1].x, yF); ctx.lineTo(P[0].x, yF); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
@@ -882,13 +896,13 @@ function drawObj(p, ctx, o, sel) {
     const x = Math.min(P[0].x, P[1].x), yy = Math.min(P[0].y, P[1].y), w = Math.abs(P[1].x - P[0].x), h = Math.abs(P[1].y - P[0].y);
     const X0 = st.extL ? 0 : x, X1 = st.extR ? pw : x + w; ctx.globalAlpha = st.op ?? 0.12; ctx.fillRect(X0, yy, X1 - X0, h); ctx.globalAlpha = 1; ctx.strokeRect(X0, yy, X1 - X0, h); if (MEAS[o.kind]) measLabel(ctx, p, o, x, yy, w, h);
   } else if (o.kind === "ch") {
-    const E1 = ends(o, P, pw); ctx.beginPath(); ctx.moveTo(E1[0], E1[1]); ctx.lineTo(E1[2], E1[3]); ctx.stroke();
+    const LVS = st.lvs || CHD, E1 = ends(o, P, pw);
     if (o.pts.length > 2) {
-      const dy = yOfP(p, o.pts[0].p + chPrice2(o)) - P[0].y, Q = P.slice(0, 2).map(q => ({ x: q.x, y: q.y + dy })), E2 = ends(o, Q, pw);
-      ctx.beginPath(); ctx.moveTo(E2[0], E2[1]); ctx.lineTo(E2[2], E2[3]); ctx.stroke();
-      ctx.globalAlpha = st.op ?? 0.07; ctx.beginPath(); ctx.moveTo(E1[0], E1[1]); ctx.lineTo(E1[2], E1[3]); ctx.lineTo(E2[2], E2[3]); ctx.lineTo(E2[0], E2[1]); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
-      ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo((E1[0] + E2[0]) / 2, (E1[1] + E2[1]) / 2); ctx.lineTo((E1[2] + E2[2]) / 2, (E1[3] + E2[3]) / 2); ctx.stroke();
-    }
+      const dy = yOfP(p, o.pts[0].p + chPrice2(o)) - P[0].y, sh = f => P.slice(0, 2).map(q => ({ x: q.x, y: q.y + dy * f })), E2 = ends(o, sh(1), pw);
+      if (st.bg !== 0) { ctx.globalAlpha = st.op ?? 0.1; ctx.fillStyle = st.fcol || col; ctx.beginPath(); ctx.moveTo(E1[0], E1[1]); ctx.lineTo(E1[2], E1[3]); ctx.lineTo(E2[2], E2[3]); ctx.lineTo(E2[0], E2[1]); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; }
+      for (const [f, c, d, on] of LVS) { if (!on) continue; const E = ends(o, sh(f), pw); ctx.strokeStyle = c || col; ctx.setLineDash(DASH[d] || []); ctx.beginPath(); ctx.moveTo(E[0], E[1]); ctx.lineTo(E[2], E[3]); ctx.stroke(); }
+      ctx.setLineDash([]);
+    } else { ctx.beginPath(); ctx.moveTo(E1[0], E1[1]); ctx.lineTo(E1[2], E1[3]); ctx.stroke(); }
   } else if (o.kind === "disj") {
     ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.stroke();
     if (P.length > 3) { ctx.beginPath(); ctx.moveTo(P[2].x, P[2].y); ctx.lineTo(P[3].x, P[3].y); ctx.stroke(); ctx.globalAlpha = st.op ?? 0.07; ctx.beginPath(); ctx.moveTo(P[0].x, P[0].y); ctx.lineTo(P[1].x, P[1].y); ctx.lineTo(P[3].x, P[3].y); ctx.lineTo(P[2].x, P[2].y); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; }
@@ -1042,6 +1056,7 @@ const TOOL_HINT = { hr: "Horizontal ray: tap a point", disj: "Disjoint channel: 
   fib: "Fibonacci: drag from the swing start to the swing end",
   fx: "Measured move: drag from A (start) to B (end of the leg)"
 };
+TOOL_HINT.ch = "Channel: press, drag, release. The second line appears, drag its handle to adjust";
 function setTool(t) {
   if (t === tool) t = null;
   tool = t; cross = null; pend = null; G = null;
@@ -1087,7 +1102,7 @@ function onDown(p, e) {
   if (ONE[tool]) {
     const m = magnetPoint(p, pt.x, pt.y), o = { kind: tool, pts: [ptOf(m)] };
     if (TXT[tool]) { const t = prompt("Text:"); if (!t) { setTool(null); G = null; return; } o.text = t; }
-    if (tool === "long" || tool === "short") { const sg = tool === "long" ? 1 : -1, r = (p.map.hi - p.map.lo) * 0.06; o.pts = [ptOf(m), ptOf({ T: m.T, p: m.p - sg * r }), ptOf({ T: m.T, p: m.p + sg * 2 * r }), ptOf({ T: m.T + 24 * tfMs(p.tf), p: m.p })]; }
+    if (tool === "long" || tool === "short") { const sg = tool === "long" ? 1 : -1, r = (p.map.hi - p.map.lo) * 0.06; o.pts = [ptOf(m), ptOf({ T: m.T, p: m.p - sg * r }), ptOf({ T: m.T, p: m.p + sg * r }), ptOf({ T: m.T + 24 * tfMs(p.tf), p: m.p })]; }
     addDrawing(o); setTool(null); G = null; return;
   }
   if (tool === "h") { const pr = pOfY(p, pt.y); addDrawing({ kind: "h", pts: [{ date: days[dayIdx].date, ms: 0, p: pr }] }); setTool(null); G = null; return; }
@@ -1161,6 +1176,10 @@ function onUp(p, e, cancelled) {
       const far = g.moved && Math.hypot(pt.x - g.sx, pt.y - g.sy) > 10;
       if (!far) { pend = null; break; }
       if (THREE[pend.kind]) { pend.stage = 2; $("modetxt").textContent = pend.kind === "disj" ? "Press and drag the second line" : pend.kind === "fx" || pend.kind === "fibx" ? "Press and drag to point C (end of the pullback)" : "Tap where the second line should go"; break; }
+      if (pend.kind === "ch") {
+        const ta = Tof(a.date, a.ms), tb = Tof(b.date, b.ms);
+        if (ta != null && tb != null && tb !== ta) { const tm = (ta + tb) / 2, lineP = a.p + (b.p - a.p) * (tm - ta) / (tb - ta), c = ptOf({ T: tm, p: lineP - (p.map.hi - p.map.lo) * 0.12 }); const oc = { kind: "ch", pts: [a, b, c] }; pend = null; addDrawing(oc); setTool(null); break; }
+      }
       const o = { kind: pend.kind, pts: [a, b] }; pend = null; addDrawing(o); setTool(null); break;
     }
     case "dj": { const o = { kind: "disj", pts: pend.obj.pts.slice(0, 4) }; pend = null; addDrawing(o); setTool(null); break; }
@@ -1967,14 +1986,14 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     if (BR) { const h = hitPlot(BR.p, e); if (h && Math.hypot(h.x - BR.lx, h.y - BR.ly) >= 3) { BR.o.pts.push(pPt(BR.p, h.x, h.y)); BR.lx = h.x; BR.ly = h.y; } }
     if (PL) { const h = hitPlot(PL.p, e); if (h) PL.o.pts[PL.o.pts.length - 1] = ptOf(magnetPoint(PL.p, h.x, h.y)); }
   });
-  addEventListener("pointerup", () => { if (BR) { saveDrawings(); BR = null; setTool(null); } });
+  addEventListener("pointerup", () => { if (BR) { saveDrawings(); BR = null; } });
   const endPoly = () => { if (!PL) return; const q = PL.o.pts; q.pop(); while (q.length > 2 && q[q.length - 1].ms === q[q.length - 2].ms && q[q.length - 1].p === q[q.length - 2].p) q.pop(); PL = null; saveDrawings(); setTool(null); };
   addEventListener("dblclick", endPoly); addEventListener("keydown", e => { if (e.key === "Enter" || e.key === "Escape") endPoly(); });
   // ----- left rail
   const SEC = t => ["#", t];
   const GR = [
     ["✛", "Cursor", [["Cross", "cur:cross"], ["Dot", "cur:dot"], ["Arrow", "cur:arrow"]]],
-    ["╱", "Lines", [SEC("Lines"), ["Trendline", "tl"], ["Ray", "ray"], ["Info line", "info"], ["Extended line", "ext"], ["Horizontal line", "h"], ["Horizontal ray", "hr"], ["Vertical line", "vl"], SEC("Channels"), ["Parallel channel", "ch"], ["Flat top/bottom", "flat"], ["Disjoint channel", "disj"]]],
+    ["╱", "Lines", [SEC("Lines"), ["Trendline", "tl"], ["Ray", "ray"], ["Info line", "info"], ["Extended line", "ext"], ["Horizontal line", "h"], ["Horizontal ray", "hr"], ["Vertical line", "vl"], SEC("Channels"), ["Parallel channel", "ch"]]],
     ["≣", "Fibonacci", [["Fib retracement", "fib"], ["Trend-based fib extension", "fibx"]]],
     ["⇅", "Forecasting and measurers", [SEC("Forecasting"), ["Long position", "long"], ["Short position", "short"], SEC("Measurers"), ["Price range", "prange"], ["Date range", "drange"], ["Date and price range", "dprange"]]],
     ["✎", "Brushes, arrows, shapes", [SEC("Brushes"), ["Brush", "brush"], SEC("Arrows"), ["Arrow marker", "amk"], ["Arrow", "arrow"], ["Arrow mark up", "amup"], ["Arrow mark down", "amdn"], SEC("Shapes"), ["Rectangle", "rect"], ["Polyline", "poly"]]],
@@ -2026,6 +2045,12 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     body.append(R("Use one color", chk(st.one, x => setSt(o, "one", x ? 1 : 0)), clr(st.col || TH.pc, x => { st.col = x; setSt(o, "one", 1); })), R("Background", chk(st.bg, x => setSt(o, "bg", x ? 1 : 0)), (() => { const el = E("input"); el.type = "range"; el.min = 0; el.max = 100; el.value = Math.round((st.op ?? .08) * 100); el.oninput = () => setSt(o, "op", el.value / 100); return el; })()), R("Show level values", chk(st.lab, x => setSt(o, "lab", x ? 1 : 0))));
     LN.slice(1).forEach(f => body.append(field(o, f)));
   }
+  function chStyle(o, body) {
+    const st = o.st || (o.st = {}); if (!st.lvs) st.lvs = CHD.map(q => q.slice());
+    st.lvs.forEach(q => { const cb = chk(q[3], x => { q[3] = x ? 1 : 0; saveDrawings(); redraw(); }); if (q[0] === 0 || q[0] === 1) { q[3] = 1; cb.checked = true; cb.disabled = true; }
+      body.append(R("Level " + q[0], cb, clr(q[1] || st.col || TH.pc, x => { q[1] = x; saveDrawings(); redraw(); }), sel(DSH, q[2] || 0, x => { q[2] = +x; saveDrawings(); redraw(); }))); });
+    body.append(field(o, ["ext", "Extend", "ext", "LR"]), R("Background", chk(st.bg !== 0, x => setSt(o, "bg", x ? 1 : 0)), clr(st.fcol || st.col || TH.pc, x => setSt(o, "fcol", x)), (() => { const el = E("input"); el.type = "range"; el.min = 0; el.max = 100; el.value = Math.round((st.op ?? .1) * 100); el.oninput = () => setSt(o, "op", el.value / 100); return el; })()), field(o, ["w", "Thickness", "w"]));
+  }
   const dlg = E("div"); dlg.id = "ddlg"; dlg.hidden = true; document.body.append(dlg); let tab = 0, sTab = 0;
   dlg.onclick = e => { if (e.target === dlg) dlg.hidden = true; };
   function shell(title, names, cur, go, fill) {
@@ -2035,7 +2060,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   function openDlg() {
     const o = objSel(); if (!o) return;
     shell(NM[o.kind] || "Drawing", ["Style", "Coordinates", "Visibility"], tab, i => { tab = i; openDlg(); }, body => {
-      if (tab === 0) { if (o.kind === "fib") fibStyle(o, body); else (F[o.kind] || LN).forEach(f => body.append(field(o, f))); }
+      if (tab === 0) { if (o.kind === "fib") fibStyle(o, body); else if (o.kind === "ch") chStyle(o, body); else (F[o.kind] || LN).forEach(f => body.append(field(o, f))); }
       else if (tab === 1) o.pts.forEach((q, i) => body.append(R("Point " + (i + 1) + " price", num(q.p.toFixed(2), x => { if (isFinite(x)) { q.p = x; saveDrawings(); redraw(); } }, -1e9, 1e9, .25))));
       else TFS.forEach(t => body.append(R(TF_LABEL[t], chk(!o.st || !o.st.vis || o.st.vis.indexOf(t) >= 0, x => { const set = new Set((o.st && o.st.vis) || TFS); if (x) set.add(t); else set.delete(t); setSt(o, "vis", set.size === TFS.length ? null : Array.from(set)); }))));
     });
@@ -2088,6 +2113,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   document.addEventListener("click", () => { fly.hidden = true; cm.hidden = true; imenu.hidden = true; mtp.hidden = true; });
   document.addEventListener("contextmenu", e => {
     if (!document.body.classList.contains("desk")) return;
+    if (tool) { e.preventDefault(); setTool(null); return; }
     const p = panels.find(q => { if (!q.map) return false; const r = q.cv.getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; });
     if (!p) return; e.preventDefault(); if (tool) setTool(null); LP = p;
     const r = p.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, inPlot = x < p.map.pw && y < p.map.ph, dh = inPlot ? drawHit(p, x, y) : null;
