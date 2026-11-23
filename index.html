@@ -40,7 +40,10 @@ h2{font-size:clamp(28px,4vw,44px);letter-spacing:-1.2px;line-height:1.08;margin-
 .band .sec{display:flex;gap:30px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-bottom:8vh}
 footer{max-width:1200px;margin:auto;padding:8vh 5vw 6vh;color:var(--m);font-size:14px}footer b{color:var(--t)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
-.mt h2{max-width:none;margin:0 0 6px}.mt h2:nth-child(2){color:var(--m)}</style></head><body>
+.mt h2{max-width:none;margin:0 0 6px}.mt h2:nth-child(2){color:var(--m)}.pl{font-style:normal;font-size:11px;background:#F5B64222;color:var(--a);border-radius:20px;padding:1px 9px;margin:0 auto 0 8px;align-self:center}.ch{align-items:center}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:30px}.strip div{background:var(--s);border:1px solid var(--l);border-radius:12px;padding:14px 16px}.strip b{display:block;font-size:17px}.strip span{color:var(--m);font-size:14px}
+.jt{width:100%;border-collapse:collapse;margin-top:6px}.jt th{color:var(--m);font-weight:400;text-align:left;padding:8px 12px;font-size:14px}.jt td{padding:10px 12px;border-top:1px solid var(--l);font-variant-numeric:tabular-nums}.jb{background:var(--s);border:1px solid var(--l);border-radius:16px;padding:14px 18px;overflow-x:auto}
+.bl{margin:14px 0 0 18px;color:var(--m)}.bl b{color:var(--t)}.tag{color:var(--a)}</style></head><body>
 <nav><a class="logo" href="./"><img src="app/icon-192.png" alt="">BarByBar</a><a class="l" href="app/">Chart</a><a class="l" href="#charts">Sessions</a><a class="l" href="#how">How it works</a><span class="sp"></span><span id="au"><a class="l" href="login.html">Log in</a> <a class="btn s" href="login.html#signup">Sign up free</a></span></nav>
 
 <header class="hero"><canvas id="hc" aria-hidden="true"></canvas><div class="hi">
@@ -49,28 +52,29 @@ footer{max-width:1200px;margin:auto;padding:8vh 5vw 6vh;color:var(--m);font-size
 <div class="cta"><a class="btn" href="app/">Open the chart</a><a class="btn o" href="login.html#signup">Create free account</a></div>
 <p class="note">Free to use. Sign in to unlock your trade log, stats and more tools.</p></div></header>
 
-<section class="sec mt"><h2>Find your edge.</h2><h2>Find your weakness and make it your strength.</h2></section>
+<section class="sec mt"><h2>Find your edge.</h2><h2>Find your weakness and make it your strength.</h2><p class="lead" style="margin-top:14px">Spot second entries, failed breakouts and trading ranges without hindsight.</p></section>
 <section class="sec" id="charts"><h2>Pick a session. The bar is already forming.</h2><p class="lead">These charts replay real days. Click one to open the full chart.</p>
 <div class="sum" id="sm"></div><div class="cg" id="cg"></div></section>
 
-<section class="sec" id="how"><h2>Watch it. Trade it. Review it.</h2><p class="lead">The same three steps every session.</p>
+<section class="sec" id="how"><h2>Watch it. Trade it. Review it.</h2><p class="lead">Pure price action practice on S&amp;P 500 regular hours: bars, ranges, breakouts and pullbacks. Indicators are optional.</p>
 <div class="fl">
 <div><b><em>1</em>Watch it form</b><span>The bar builds tick by tick, like a live chart. You set the speed and press Next bar when you are ready.</span></div>
 <div><b><em>2</em>Trade it</b><span>Drag stop and target, take partials, move to break-even, and tag every setup.</span></div>
 <div><b><em>3</em>Review it</b><span>Every trade in R, with a journal and stats that show where your edge is.</span></div></div>
-<div class="fl" style="margin-top:30px">
-<div><b>09:30 to 16:15 New York</b><span>Regular hours only: 81 five-minute bars a day.</span></div>
-<div><b>Five timeframes</b><span>5m, 15m, 45m, 1h and daily, all built from the same ticks.</span></div>
-<div><b>Classic or Modern</b><span>A white MetaTrader look, or a dark one for long sessions. Color-blind colors included.</span></div>
-<div><b>Works offline</b><span>Days are saved on your device after the first load.</span></div></div></section>
+<div class="strip"><div><b>09:30 to 16:15 New York</b><span>81 five-minute bars a day</span></div><div><b>5m, 15m, 45m, 1h, 1D</b><span>All built from the same ticks</span></div><div><b>Classic or Modern</b><span>Light chart or dark, color-blind colors included</span></div><div><b>Works offline</b><span>Days are saved after the first load</span></div></div>
+<h2 style="margin-top:9vh">After the chart: your journal.</h2><p class="lead">Tag every trade with its setup and see your results in R. Sample data below, not real trades.</p>
+<div class="jb"><table class="jt"><thead><tr><th>Setup tag</th><th>Side</th><th>Result</th></tr></thead><tbody>
+<tr><td class="tag">Second entry (H2/L2)</td><td>Buy</td><td class="up">+1.8 R</td></tr><tr><td class="tag">Failed breakout</td><td>Sell</td><td class="up">+2.0 R</td></tr><tr><td class="tag">Wedge</td><td>Buy</td><td class="dn">-1.0 R</td></tr><tr><td class="tag">Trading range fade</td><td>Sell</td><td class="up">+1.0 R</td></tr>
+<tr><td colspan="2"><b>Win rate 75%</b></td><td><b>+3.8 R total</b></td></tr></tbody></table></div>
+</section>
 
-<div class="band"><div class="sec"><div><h2>Free for everyone.<br>More with an account.</h2><p class="lead" style="margin:0">Log in to keep your journal, see your stats and unlock the extra tools.</p></div><div class="cta"><a class="btn" href="login.html#signup">Create free account</a><a class="btn o" href="app/">Just open the chart</a></div></div></div>
+<div class="band"><div class="sec"><div><h2>Free for everyone.<br>More with an account.</h2><p class="lead" style="margin:0">Log in to keep your journal, see your stats and unlock the extra tools.</p><ul class="bl"><li><b>Free now:</b> replay, all drawing tools, trading and chart settings</li><li><b>With an account:</b> trade log, stats and backup (coming)</li><li><b>Phone app:</b> on the way</li></ul></div><div class="cta"><a class="btn" href="login.html#signup">Create free account</a><a class="btn o" href="app/">Just open the chart</a></div></div></div>
 <footer><b>BarByBar</b>: one bar at a time. An independent practice tool for price action traders, not affiliated with Al Brooks or any trading course. For education, not advice.</footer>
 
 <script>
 const B="https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/",$=s=>document.querySelector(s);
 // account state (test version: anything is accepted on the login page)
-try{const u=JSON.parse(localStorage.getItem("bbb_user")||"null");if(u){$("#au").innerHTML='<span class="l" style="color:var(--m)">Hi, '+u.name.replace(/[<>&"]/g,"")+'</span> <a class="btn s o" href="#" id="lo">Log out</a>';$("#lo").onclick=e=>{e.preventDefault();localStorage.removeItem("bbb_user");location.reload()}}}catch(e){}
+try{const u=JSON.parse(localStorage.getItem("bbb_user")||"null");if(u){$("#au").innerHTML='<span class="l" style="color:var(--m)">Hi, '+String(u.name||"Trader").replace(/[<>&"]/g,"")+'</span> <a class="btn s o" href="#" id="lo">Log out</a>';$("#lo").onclick=e=>{e.preventDefault();localStorage.removeItem("bbb_user");location.reload()}}}catch(e){}
 // charts
 let seed=11;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;
 function sim(){let p=5800+rnd()*300,o=[];for(let k=0;k<81;k++){const a=p;let h=a,l=a,c=a;for(let i=0;i<10;i++){c+=(rnd()-.485)*2.6;h=Math.max(h,c);l=Math.min(l,c)}p=c;o.push([k,a,h,l,c])}return o}
@@ -89,14 +93,14 @@ x.fillStyle="#F5B642";x.beginPath();x.arc(cx,Y(L[2])-6,2.8,0,7);x.fill()}
 const items=[];
 function add(cv,ax,N,spd,b){const it={cv,ax,N,spd,b:b||sim(),t:ax?30:20,vis:1};new IntersectionObserver(e=>it.vis=e[0].isIntersecting).observe(cv);items.push(it);return it}
 add($("#hc"),0,70,2.2);
-const cards=[0,1,2].map(k=>{const a=document.createElement("a");a.className="cc";a.href="app/";a.innerHTML='<div class="ch"><b>S&amp;P 500</b><span>5m replay</span></div><canvas></canvas><span class="go">Open chart</span>';$("#cg").appendChild(a);return{a,it:add(a.querySelector("canvas"),1,48,1.4)}});
-let last=performance.now();(function loop(t){const dt=Math.min(.1,(t-last)/1000);last=t;items.forEach(it=>{if(!it.vis)return;it.t+=dt*it.spd;if(it.t>=it.b.length-1)it.t=it.ax?30:20;draw(it)});requestAnimationFrame(loop)})(last);
+const cards=[0,1,2].map(k=>{const a=document.createElement("a");a.className="cc";a.href="app/";a.innerHTML='<div class="ch"><b>S&amp;P 500</b><span>5m replay</span><i class="pl">Live replay</i></div><canvas></canvas><span class="go">Open chart</span>';$("#cg").appendChild(a);return{a,it:add(a.querySelector("canvas"),1,48,1.4)}});
+cards.forEach(c=>{c.it.pill=c.a.querySelector(".pl")});let last=performance.now();(function loop(t){const dt=Math.min(.1,(t-last)/1000);last=t;items.forEach(it=>{if(!it.vis)return;it.t+=dt*it.spd;if(it.t>=it.b.length-1)it.t=it.ax?30:20;draw(it);if(it.pill)it.pill.textContent="Bar "+(Math.floor(it.t)+1)+"/"+it.b.length});requestAnimationFrame(loop)})(last);
 // real data from the Supabase bucket (falls back to the simulated charts above)
 fetch(B+"daily.json").then(r=>r.json()).then(async dj=>{const days=Object.keys(dj).sort();if(days.length<8)return;
 const sm=$("#sm");days.slice(-5).reverse().forEach(d=>{const q=dj[d],pv=dj[days[days.indexOf(d)-1]],ch=pv?(q[3]-pv[3])/pv[3]*100:0;
-const a=document.createElement("a");a.href="app/";a.innerHTML='<small>'+d+'</small><b>'+(q[3]/1000).toFixed(1)+'</b><i class="'+(ch>=0?"up":"dn")+'">'+(ch>=0?"+":"")+ch.toFixed(2)+'%</i>';sm.appendChild(a)});
+const a=document.createElement("a");a.href="app/?date="+d;a.innerHTML='<small>'+d+'</small><b>'+(q[3]/1000).toFixed(1)+'</b><i class="'+(ch>=0?"up":"dn")+'">'+(ch>=0?"+":"")+ch.toFixed(2)+'%</i>';sm.appendChild(a)});
 const pool=days.slice(-250),mc={};
 for(const c of cards){const d=pool[Math.floor(Math.random()*pool.length)],m=d.slice(0,7);
 try{mc[m]=mc[m]||await fetch(B+"m_"+m+".json").then(r=>r.json());const bars=mc[m][d].map(r=>[r[0],r[1]/1000,r[2]/1000,r[3]/1000,r[4]/1000]);
-if(bars.length>20){c.it.b=bars;c.it.t=24;c.a.querySelector("span").textContent=d+" · 5m replay"}}catch(e){}}}).catch(()=>{});
+if(bars.length>20){c.it.b=bars;c.it.t=24;c.a.href="app/?date="+d;c.a.querySelector("span").textContent=d+" · 5m replay"}}catch(e){}}}).catch(()=>{});
 </script></body></html>
