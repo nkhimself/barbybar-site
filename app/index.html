@@ -180,6 +180,7 @@
   .nav button{width:28px;height:28px;border-radius:50%;background:#13233Acc;color:#E8EEF6;border:1px solid #24395A;cursor:pointer;font-size:14px;padding:0}
   #mtp,#imenu{position:fixed;z-index:55;background:#13233A;color:#E8EEF6;border:1px solid #24395A;border-radius:12px;padding:8px;box-shadow:0 10px 34px #000a;font:13px system-ui,sans-serif}
   #mtp[hidden],#imenu[hidden]{display:none}
+  #pracp select{width:100%;margin-top:8px;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit}#pracp .pr{display:flex;gap:6px;margin-top:6px}#pracp .pr button{flex:1;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit;cursor:pointer}#pracp .pr button.on{background:#F5B642;color:#1a1200;font-weight:700}
   #mtp .mc{background:#0F1B2D;color:#E8EEF6;border:1px solid #F0707A;border-radius:8px;padding:3px 10px;font:inherit;cursor:pointer}#mtp .mc:hover{background:#F0707A;color:#1a0505}
   #mtp table{border-collapse:collapse;min-width:520px}#mtp th{color:#8CA0BA;font-weight:400;text-align:left;padding:4px 10px}#mtp td{padding:7px 10px;border-top:1px solid #24395A}#mtp tbody tr{cursor:pointer}#mtp tbody tr:hover{background:#1b3358}
   .buy{color:#2EC4A6}.sell{color:#F0707A}
@@ -249,7 +250,7 @@ const DATA_BASE = (() => {
   if (q) return q.endsWith("/") ? q : q + "/";
   return "https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/";
 })();
-const VER = "4.11.0";
+const VER = "4.12.0";
 let LP = null;
 const dOn = (o, p) => (o.pid == null ? panels.indexOf(main) : o.pid) === panels.indexOf(p);
 const vTL = p => p.tl != null ? p.tl : S.showLines !== false, vHI = p => p.hi2 != null ? p.hi2 : S.showHist !== false;
@@ -260,6 +261,11 @@ let TH = THEMES[SKIN], DHIDE = false, DLOCK = false;
 const ONE = { hr: 1, vl: 1, txt: 1, note: 1, pnote: 1, tnote: 1, cmt: 1, amup: 1, amdn: 1, long: 1, short: 1 }, TXT = { txt: 1, note: 1, pnote: 1, tnote: 1, cmt: 1 };
 const TWO = { ch: 1, tl: 1, ray: 1, info: 1, ext: 1, arrow: 1, amk: 1, rect: 1, fib: 1, prange: 1, drange: 1, dprange: 1, callout: 1 }, THREE = { fx: 1, fibx: 1 }, MEAS = { prange: 1, drange: 1, dprange: 1 };
 const CHD = [[-0.25, "", 0, 0], [0, "", 0, 1], [0.25, "", 0, 0], [0.5, "", 1, 1], [0.75, "", 0, 0], [1, "", 0, 1], [1.25, "", 0, 0]];
+const FPS = [["Breakouts and market type", ["Breakout (BO)", "Trading range (TR)", "Trend", "Channel"]],
+  ["Patterns and setups", ["Wedge top", "Wedge bottom", "Wedge bull flag", "Wedge bear flag", "Double top", "Cup", "Triangle", "High 2 (H2)", "Low 2 (L2)", "ii (consecutive inside bars)", "ioi (inside, outside, inside)", "Inside day", "Spike and channel", "Always in", "Buy climax", "Sell climax", "Trap", "Surprise bar", "Scaling in", "Opening reversal from the 60 min EMA"]],
+  ["Structure", ["Bull trend", "Bear trend", "Bull channel", "Bear channel", "Bull flag", "Bear flag", "FOMC"]],
+  ["Gaps", ["Gap up", "Gap down"]],
+  ["Time of day and context", ["Open", "Midday", "Globex", "Yesterday", "Daily"]]];
 const FIBD = [[0, "#787b86", 1], [0.236, "#f23645", 0], [0.382, "#ff9800", 0], [0.5, "#4caf50", 1], [0.618, "#089981", 0], [0.786, "#00bcd4", 0], [1, "#787b86", 1], [1.618, "#2962ff", 0], [2.618, "#f23645", 0], [3.618, "#9c27b0", 0], [4.236, "#e91e63", 0]];
 let CFG = (function () { try { return JSON.parse(localStorage.getItem("bbb_cfg") || "{}"); } catch (e) { return {}; } })();
 const DASH = { 1: [6, 4], 2: [1.5, 3.5] };
@@ -1308,7 +1314,7 @@ function newDraft(side) {
   let sl = done && done.d === dayIdx ? (dir > 0 ? done.l - SNAP : done.h + SNAP) : px - dir * 3;
   if (dir * (px - sl) < 1.5) sl = px - dir * 1.5;
   t.sl = snap(sl);
-  trades.push(t); refreshLive();
+  t.fp = window.fpCurrent ? window.fpCurrent() : null; trades.push(t); refreshLive();
   return t;
 }
 function validate(t) {
@@ -1813,13 +1819,14 @@ let repTab = "sum", repTags = [], repAll = true;
 function openReport() { closeRing(); closeCard(); $("report").hidden = false; renderReport(); }
 function closeReport() { $("report").hidden = true; }
 function renderReport() {
-  const el = $("report"), list = closedTrades();
-  el.innerHTML = '<div id="rhead">' + [["sum", "Summary"], ["setup", "By setup"], ["time", "By time"], ["proc", "Process"], ["list", "Trades"]].map(([k, l]) => '<button class="' + (repTab === k ? "on" : "") + '" data-tab="' + k + '">' + l + "</button>").join("") +
+  const el = $("report"), all = closedTrades(), list = all.filter(t => !t.fp), plist = all.filter(t => t.fp);
+  el.innerHTML = '<div id="rhead">' + [["sum", "Summary"], ["setup", "By setup"], ["time", "By time"], ["proc", "Process"], ["list", "Trades"], ["prac", "Practice results"]].map(([k, l]) => '<button class="' + (repTab === k ? "on" : "") + '" data-tab="' + k + '">' + l + "</button>").join("") +
     '<span class="grow"></span><button id="rClear">Clear</button><button id="rCsv">CSV</button><button id="rCopy">Copy</button><button id="rX">✕</button></div><div id="rbody"></div>';
   el.querySelectorAll("[data-tab]").forEach(b => { b.onclick = () => { repTab = b.dataset.tab; renderReport(); }; });
   $("rX").onclick = closeReport;
   $("rClear").onclick = () => { if (confirm("Clear the whole journal? All finished trades will be deleted. This cannot be undone.")) { trades = trades.filter(t => t.state !== "closed"); saveTrades(); refreshLive(); renderReport(); toast("Journal cleared"); } }; $("rCsv").onclick = () => exportCsv(list); $("rCopy").onclick = () => copyCsv(list);
   const body = $("rbody");
+  if (repTab === "prac") { renderPractice(body, plist); return; }
   if (!list.length) { body.innerHTML = "<p style='color:#5d6670'>No finished trades yet. Open the menu, tap Trade, set the stop (and a target if you want) and place an order. Every result is counted in R: 1R is the distance from your entry to your first stop.</p>"; return; }
   if (repTab === "sum") renderSummary(body, list);
   else if (repTab === "setup") renderSetup(body, list);
@@ -1861,6 +1868,21 @@ function renderSetup(body, list) {
     else { const st = statsOf(sub); box.innerHTML = '<div style="border:1px solid #d8dde3;border-radius:12px;padding:12px 16px;margin-bottom:12px"><b>' + sel.map(esc).join(" + ") + "</b> (" + (repAll ? "all tags" : "any tag") + "): " + st.n + " trades, total <span class=\"" + cls(st.total) + '">' + fR(st.total) + "</span>, average <span class=\"" + cls(st.avg) + '">' + fR(st.avg) + "</span>, win rate " + (st.winRate * 100).toFixed(0) + "%</div><div id='rsub'></div>"; renderList($("rsub"), sub); }
   }
   $("rgrp").innerHTML = groupTable("Setup", list, t => (tagsOf(t).length ? tagsOf(t) : "(no setup)"), (a, b) => b.stat.total - a.stat.total);
+}
+let repPrac = null;
+function renderPractice(body, plist) {
+  const guide = '<details open style="border:1px solid #d8dde3;border-radius:12px;padding:12px 16px;margin-bottom:14px"><summary style="cursor:pointer;font-weight:700;font-size:15px">How focused practice works</summary><ol style="margin:10px 0 4px 18px;padding:0;color:#3d4650;line-height:1.55"><li>Open <b>Focused practice</b> in the top bar and switch the mode to <b>Focused practice</b>.</li><li>Choose the one setup you want to train, for example Wedge top, Breakout or High 2 (H2).</li><li>Trade only that setup. Every trade you take while the mode is on is saved here, and it does not enter your normal journal.</li><li>Come back to this tab and click a setup to see its trades, win rate and results in R.</li><li>Switch back to <b>Free practice</b> at any time. Your normal journal stays as it is.</li></ol><p style="margin:8px 0 0;color:#5d6670">Tip: take at least 20 trades of one setup before you judge it. Pattern detection is planned for later.</p></details>';
+  const mode = '<div style="margin-bottom:12px;color:#3d4650">Mode now: <b>' + (CFG.fpOn ? "Focused practice" + (CFG.fpSet ? " (" + esc(CFG.fpSet) + ")" : " (choose a setup)") : "Free practice") + "</b></div>";
+  if (!plist.length) { body.innerHTML = guide + mode + "<p style='color:#5d6670'>No practice trades yet.</p>"; return; }
+  if (repPrac && plist.some(t => t.fp === repPrac)) {
+    const sub = plist.filter(t => t.fp === repPrac), st = statsOf(sub);
+    body.innerHTML = guide + mode + '<button id="pBack" style="border:1px solid #c9ced6;background:#fff;border-radius:20px;padding:5px 14px;font:inherit;cursor:pointer;margin-bottom:10px">← All setups</button><div style="border:1px solid #d8dde3;border-radius:12px;padding:12px 16px;margin-bottom:12px"><b>' + esc(repPrac) + "</b>: " + st.n + " trades, total <span class=\"" + cls(st.total) + '">' + fR(st.total) + "</span>, average <span class=\"" + cls(st.avg) + '">' + fR(st.avg) + "</span>, win rate " + (st.winRate * 100).toFixed(0) + '%</div><div id="pList"></div>';
+    $("pBack").onclick = () => { repPrac = null; renderPractice(body, plist); }; renderList($("pList"), sub); return;
+  }
+  const g = new Map(); for (const t of plist) (g.get(t.fp) || g.set(t.fp, []).get(t.fp)).push(t);
+  const rows = Array.from(g.entries()).map(([k, l]) => ({ k, st: statsOf(l) })).sort((a, b) => b.st.n - a.st.n);
+  body.innerHTML = guide + mode + '<table class="t"><tr><th>Setup (click to open)</th><th>Trades</th><th>Win %</th><th>Total R</th><th>Avg R</th></tr>' + rows.map(r => '<tr data-s="' + esc(r.k) + '" style="cursor:pointer"><td>' + esc(r.k) + "</td><td>" + r.st.n + "</td><td>" + (r.st.winRate * 100).toFixed(0) + '%</td><td class="' + cls(r.st.total) + '">' + fR(r.st.total) + '</td><td class="' + cls(r.st.avg) + '">' + fR(r.st.avg) + "</td></tr>").join("") + "</table>";
+  body.querySelectorAll("tr[data-s]").forEach(tr => { tr.onclick = () => { repPrac = tr.dataset.s; renderPractice(body, plist); }; });
 }
 function renderProcess(body, list) {
   const avgOf = l => l.length ? l.reduce((a, t) => a + t.R, 0) / l.length : 0;
@@ -1965,7 +1987,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   const tfs = E("select"); tfs.title = "Timeframe"; TFS.forEach(t => tfs.add(new Option(TF_LABEL[t], t))); tfs.onchange = () => setMainTf(+tfs.value); top.append(tfs, sep());
   const pl = B("▶ Play", "Play / pause", togglePlay); top.append(pl, B("⏭ Next bar", "Close this bar and go to the next", nextBar));
   const sp = E("select"); sp.title = "Speed"; [1, 5, 10, 30, 60, 150, 400].forEach(v => sp.add(new Option(v + "x", v))); sp.onchange = () => { speed = +sp.value; S.speed = speed; saveSettings(); }; top.append(sp, sep());
-  const ib = B("ƒx Indicators ▾", "Indicators", e => { e.stopPropagation(); showInd(ib); }); const prb = B("Practice ▾", "Daily challenge, streak, worst day", e => { e.stopPropagation(); showPrac(prb); }); top.append(ib, prb, E("span", "dsp"));
+  const ib = B("ƒx Indicators ▾", "Indicators", e => { e.stopPropagation(); if (!imenu.hidden) { imenu.hidden = true; return; } showInd(ib); }); const prb = B("Focused practice ▾", "Free or focused practice, daily challenge, streak", e => { e.stopPropagation(); showPrac(prb); }); top.append(ib, prb, E("span", "dsp"));
   const mb = B("Manage trades", "Open trades and orders", e => { e.stopPropagation(); showMtp(mb); });
   top.append(B("📈 New trade", "Open the trade window for a new order", () => openTradeCard(), "acc"), mb, B("📒 Journal", "Trade journal and stats", openReport), sep(), B("⚙", "Chart settings", () => openSettings(0)), B("📷", "Save a picture of the chart", shot), B("⛶", "Full screen", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()));
   // ----- indicators (EMA, ATR)
@@ -2117,7 +2139,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   // ----- chart settings: Symbol, Status line, Scales and lines, Canvas, Display
   const on1 = k => CFG[k] !== 0, st01 = k => v => setC(k, v ? 1 : 0);
   function openSettings(i) {
-    sTab = i; shell("Chart settings", ["Symbol", "Status line", "Scales and lines", "Canvas", "Display", "Practice"], sTab, k => openSettings(k), body => {
+    sTab = i; shell("Chart settings", ["Symbol", "Status line", "Scales and lines", "Canvas", "Display", "Focused practice"], sTab, k => openSettings(k), body => {
       if (sTab === 0) {
         body.append(R("Color theme", sel([["classic", "Classic (light)"], ["modern", "Modern (dark)"], ["blind", "Color-blind (dark)"]], SKIN, v => { setSkin(v); openSettings(0); })), R("Color bars based on previous close", chk(CFG.pc, st01("pc"))));
         [["Body", "bod", "bu", "bdn"], ["Borders", "bor", "ru", "rd"], ["Wick", "wk", "wu", "wd"]].forEach(([n, o, u, d]) => body.append(R(n, chk(CFG[o], st01(o)), clr(CFG[u] || TH.up, v => setC(u, v)), clr(CFG[d] || TH.dn, v => setC(d, v)))));
@@ -2198,7 +2220,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     if (!on) { props(); return; }
     dl.textContent = days[dayIdx] ? days[dayIdx].date : ""; pl.textContent = playing ? "⏸ Pause" : "▶ Play"; pl.classList.toggle("on", !!playing);
     tfs.value = main.tf; sp.value = speed; gb.forEach(b => b.classList.toggle("on", b._it.some(x => x[1] === tool))); gb[0].textContent = { cross: "✛", dot: "•", arrow: "➤" }[CUR];
-    if (!mtp.hidden) fillMtp(); props();
+    if (!mtp.hidden) fillMtp(); props(); updFp();
   }
   // ----- practice features (each one can be turned off in Chart settings, Practice)
   const PK = [["pe", "Rate each trade: emotion and plan"], ["pq", "End-of-session questions"], ["pt", "Tilt guard: pause after 2 losses, mark revenge trades"], ["pl", "Daily loss limit (locks the session)"], ["pd", "Daily challenge"], ["ps", "Practice streak"], ["pw", "Revisit your worst day"]];
@@ -2251,9 +2273,25 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     if (pOn("ps")) { const s = streak(); h += '<div class="pi"><b>Practice streak</b><p>' + s.n + (s.n === 1 ? " day" : " days") + (s.today ? "" : " (practice today to keep it)") + "</p></div>"; }
     const w = pOn("pw") ? worstDay() : null; if (w && Date.now() - w.real >= 7 * 864e5) h += '<div class="pi"><b>Revisit your worst day</b><p>' + w.date + ": " + w.R.toFixed(2) + " R in " + w.n + ' trades</p><button id="pwGo">Replay it</button></div>';
     if (pOn("pl")) h += '<div class="pi"><b>Daily loss limit</b><p>' + (days[dayIdx] ? dayR(days[dayIdx].date).toFixed(2) : "0.00") + " R today, limit -" + (CFG.pll || 3) + " R" + (window.lossLocked() ? " (session locked)" : "") + "</p></div>";
-    prac.innerHTML = h || "<p>Nothing is turned on. Open Chart settings, Practice.</p>";
+    prac.innerHTML = h; prac.prepend(modeBox());
     const g = prac.querySelector("#pcGo"); if (g) g.onclick = () => { prac.hidden = true; goDay(challenge().i); };
     const g2 = prac.querySelector("#pwGo"); if (g2) g2.onclick = () => { prac.hidden = true; const x = worstDay(), i = x ? days.findIndex(d => d.date === x.date) : -1; if (i >= 0) goDay(i); };
+  }
+  window.fpCurrent = () => CFG.fpOn && CFG.fpSet ? CFG.fpSet : null;
+  const fpDrafts = () => { trades.filter(t => t.state === "draft").forEach(t => { t.fp = window.fpCurrent(); }); };
+  function updFp() { prb.textContent = CFG.fpOn ? "🎯 Focused: " + (CFG.fpSet || "choose a setup") + " ▾" : "Focused practice ▾"; prb.classList.toggle("on", !!CFG.fpOn); }
+  function modeBox() {
+    const d = E("div", "pi"), on = !!CFG.fpOn, seg = E("div", "pr");
+    d.append(E("b", "", "Mode"));
+    [["Free practice", 0], ["Focused practice", 1]].forEach(([n, v]) => { const b = E("button", (on ? 1 : 0) === v ? "on" : "", n); b.onclick = () => { CFG.fpOn = v; saveCfg(); fpDrafts(); fillPrac(); updFp(); }; seg.append(b); });
+    d.append(seg);
+    if (on) {
+      const s = E("select"); s.add(new Option("Choose a setup…", ""));
+      FPS.forEach(([g, items]) => { const og = document.createElement("optgroup"); og.label = g; items.forEach(n => og.append(new Option(n, n))); s.append(og); });
+      s.value = CFG.fpSet || ""; s.onchange = () => { CFG.fpSet = s.value; saveCfg(); fpDrafts(); fillPrac(); updFp(); };
+      d.append(s, E("p", "", CFG.fpSet ? "Every trade you take now is saved in the journal under Practice results. Trade only: <b>" + CFG.fpSet + "</b>." : "Choose the one setup you want to practice. Trades are saved to Practice results once you choose."));
+    } else d.append(E("p", "", "Free practice: your trades go to the normal journal."));
+    return d;
   }
   function showPrac(btn) { if (!prac.hidden) { prac.hidden = true; return; } const r = btn.getBoundingClientRect(); prac.style.left = r.left + "px"; prac.style.top = r.bottom + 6 + "px"; fillPrac(); prac.hidden = false; }
   const qd = new URLSearchParams(location.search).get("date");
