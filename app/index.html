@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
-<title>BarByBar</title>
+<title>Baarina</title>
 <style>
   :root { --bg:#fff; --panel:#eef0f3; --line:#c9ced6; --fg:#15181d; --muted:#5d6670; --acc:#1f6feb; --up:#1a7f37; --dn:#c62828; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -178,13 +178,13 @@
   .ind{position:absolute;left:8px;top:26px;font:12px system-ui,sans-serif;color:#8CA0BA;pointer-events:none}
   .nav{position:absolute;left:8px;bottom:34px;display:flex;gap:4px;opacity:0;transition:opacity .2s;z-index:3}.pbox:hover .nav{opacity:1}body.nvA .nav{opacity:1}body.nvO .nav{display:none}
   .nav button{width:28px;height:28px;border-radius:50%;background:#13233Acc;color:#E8EEF6;border:1px solid #24395A;cursor:pointer;font-size:14px;padding:0}
-  #mtp,#imenu{position:fixed;z-index:55;background:#13233A;color:#E8EEF6;border:1px solid #24395A;border-radius:12px;padding:8px;box-shadow:0 10px 34px #000a;font:13px system-ui,sans-serif}
-  #mtp[hidden],#imenu[hidden]{display:none}
+  #mtp,#imenu,#ddm{position:fixed;z-index:55;background:#13233A;color:#E8EEF6;border:1px solid #24395A;border-radius:12px;padding:8px;box-shadow:0 10px 34px #000a;font:13px system-ui,sans-serif}
+  #mtp[hidden],#imenu[hidden],#ddm[hidden]{display:none}
   #pracp select{width:100%;margin-top:8px;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit}#pracp .pr{display:flex;gap:6px;margin-top:6px}#pracp .pr button{flex:1;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit;cursor:pointer}#pracp .pr button.on{background:#F5B642;color:#1a1200;font-weight:700}
   #mtp .mc{background:#0F1B2D;color:#E8EEF6;border:1px solid #F0707A;border-radius:8px;padding:3px 10px;font:inherit;cursor:pointer}#mtp .mc:hover{background:#F0707A;color:#1a0505}
   #mtp table{border-collapse:collapse;min-width:520px}#mtp th{color:#8CA0BA;font-weight:400;text-align:left;padding:4px 10px}#mtp td{padding:7px 10px;border-top:1px solid #24395A}#mtp tbody tr{cursor:pointer}#mtp tbody tr:hover{background:#1b3358}
   .buy{color:#2EC4A6}.sell{color:#F0707A}
-  #imenu button{display:flex;justify-content:space-between;gap:20px;width:100%;text-align:left;background:none;border:0;color:inherit;padding:7px 10px;border-radius:6px;font:inherit;cursor:pointer}#imenu button:hover{background:#1b3358}
+  #imenu button,#ddm button{display:flex;justify-content:space-between;gap:20px;width:100%;text-align:left;background:none;border:0;color:inherit;padding:7px 10px;border-radius:6px;font:inherit;cursor:pointer}#imenu button:hover,#ddm button:hover{background:#1b3358}#ddm button.on{color:#F5B642}
 
   #ppop{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;background:#13233A;color:#E8EEF6;border:1px solid #F5B64288;border-radius:14px;padding:14px 16px;box-shadow:0 12px 40px #000b;font:14px system-ui,sans-serif;width:min(560px,94vw);display:flex;flex-direction:column;gap:10px}
   #ppop[hidden],#ptilt[hidden],#pracp[hidden]{display:none}
@@ -197,6 +197,32 @@
   #ptilt>div{background:#13233A;border:1px solid #F5B642;border-radius:16px;padding:28px 32px;text-align:center;color:#E8EEF6;max-width:380px}#ptilt h3{font-size:24px;margin-bottom:8px}#ptilt b{display:block;font-size:44px;margin:12px 0;font-variant-numeric:tabular-nums;color:#F5B642}
   #pracp{position:fixed;z-index:55;background:#13233A;color:#E8EEF6;border:1px solid #24395A;border-radius:12px;padding:10px 12px;box-shadow:0 10px 34px #000a;font:13px system-ui,sans-serif;min-width:290px}
   .pi{padding:9px 4px;border-top:1px solid #24395A}.pi:first-child{border:0}.pi p{margin:3px 0}.pi small{color:#8CA0BA}
+
+  #report{--bg:#0B1524;--panel:#13233A;--line:#24395A;--fg:#E8EEF6;--muted:#8CA0BA;background:radial-gradient(900px 520px at 88% -8%,#1b3358,#0B1524 62%);color:var(--fg);font-family:"Segoe UI",system-ui,sans-serif}
+  #report #rhead{background:#0F1B2Dd9;backdrop-filter:blur(10px);padding:10px clamp(12px,4vw,40px);gap:8px;border-bottom:1px solid #24395A}
+  #report .rt{font-size:19px;letter-spacing:-.4px;margin-right:12px}
+  #report #rhead button{background:none;border:1px solid transparent;color:#8CA0BA;border-radius:20px;padding:7px 15px;font:inherit;cursor:pointer}
+  #report #rhead button:hover{color:#E8EEF6;background:#1b3358}#report #rhead button.on{background:#F5B642;color:#1a1200;font-weight:700}
+  #report #rhead #rX{font-size:16px}
+  #report #rbody{padding:20px clamp(12px,4vw,40px) 44px;max-width:1240px;margin:0 auto;width:100%}
+  #report .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px}
+  #report .hero div{padding:20px 22px;border-radius:18px;background:linear-gradient(135deg,#1d3a66,#13233A);border:1px solid #2b4570;box-shadow:0 12px 34px #0006}
+  #report .hero small{display:block;color:#8CA0BA;font-size:13px}#report .hero b{font-size:36px;letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
+  #report .cards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+  #report .kc{background:linear-gradient(180deg,#16294688,#13233A);border:1px solid #24395A;border-radius:14px;padding:14px 16px}
+  #report .kc .k{color:#8CA0BA;font-size:12px}#report .kc .v{font-size:23px;font-weight:700;margin-top:2px}
+  #report .pos{color:#2EC4A6}#report .neg{color:#F0707A}
+  #report table.t{border-collapse:separate;border-spacing:0;background:#13233A;border:1px solid #24395A;border-radius:14px;overflow:hidden;margin-bottom:16px}
+  #report table.t th{background:#0F1B2D;color:#8CA0BA;padding:11px 14px;border-bottom:1px solid #24395A}
+  #report table.t td{padding:11px 14px;border-bottom:1px solid #1b2f4d}#report table.t tr:last-child td{border-bottom:0}
+  #report table.t tr[data-id]:hover td,#report table.t tr[data-s]:hover td{background:#1b3358}
+  #report #eq{background:#0F1B2D;border:1px solid #24395A;border-radius:16px;height:210px}
+  #report .tr-edit td{background:#16294a}#report p{color:#8CA0BA}#report b{color:#E8EEF6}
+  #report details{background:#13233A}#report details li{color:#c3d0e2}
+  #ddate{min-width:96px;font-variant-numeric:tabular-nums}
+  #dtop .dd{border:1px solid #24395A;background:#13233A}
+  #ddm{max-height:60vh;overflow:auto}
+  #imenu i{display:block;color:#8CA0BA;font-size:12px;font-style:normal;padding:2px 10px 6px}
 </style>
 </head>
 <body>
@@ -250,7 +276,7 @@ const DATA_BASE = (() => {
   if (q) return q.endsWith("/") ? q : q + "/";
   return "https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/";
 })();
-const VER = "4.12.0";
+const VER = "4.13.0";
 let LP = null;
 const dOn = (o, p) => (o.pid == null ? panels.indexOf(main) : o.pid) === panels.indexOf(p);
 const vTL = p => p.tl != null ? p.tl : S.showLines !== false, vHI = p => p.hi2 != null ? p.hi2 : S.showHist !== false;
@@ -499,7 +525,7 @@ async function extendHistory() {
 }
 
 async function resetDay(i, keep) {
-  busy = true; playing = false;
+  HLT = null; busy = true; playing = false;
   if (!keep) flattenLive("changed day");
   closeCard();
   $("msg").style.display = "flex"; $("msg").textContent = "Loading " + days[i].date + "…";
@@ -727,7 +753,7 @@ function drawPanel(p) {
     }
   }
   // 20 EMA
-  if (S.ema !== false) {
+  if (p.ema != null ? p.ema : S.ema !== false) {
     ctx.strokeStyle = "#00a0a8"; ctx.lineWidth = 1.3; ctx.beginPath();
     for (let i = i0; i <= i1; i++) { const x = xc(i) + 0.5, yy = y(arr[i].e); if (i === i0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy); }
     ctx.stroke();
@@ -1434,7 +1460,29 @@ function drawTrades(p, ctx, y, pw, phc) {
     if (vHI(p) && t.state !== "draft" && t.openMs != null) drawFills(p, ctx, y, t);
   }
 }
+let HLT = null;
+async function showTradeOnChart(t) {
+  const i = days.findIndex(d => d.date === t.date);
+  if (i < 0) { toast("That day is not available."); return; }
+  const target = Math.min(SESSION_MS, (t.closeMs != null ? t.closeMs : (t.openMs || 0)) + 10 * 60000);
+  if (i !== dayIdx) { if (live.length && !confirm("Opening this trade changes the day and closes your open trades and orders. Continue?")) return; closeReport(); await goDay(i); } else closeReport();
+  if (clock < target) { restoring = true; advanceTo(target); restoring = false; }
+  HLT = t.id; S.showHist = true; panels.forEach(p => { p.hi2 = true; p.off = 0; }); saveSettings(); syncUI();
+  toast("Entry " + t.entry.toFixed(2) + ", result " + fR(t.R) + ". The trade is marked on the chart.", 5500);
+}
 function drawFills(p, ctx, y, t) {
+  drawFills0(p, ctx, y, t);
+  if (t.id !== HLT || !t.exits.length) return;
+  const le = t.exits[t.exits.length - 1], T0 = Tof(t.date, t.openMs), T1 = Tof(t.date, le.ms); if (T0 == null || T1 == null) return;
+  ctx.save(); ctx.font = "700 11px system-ui,sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+  [[xOfT(p, T0), y(t.entry), "ENTRY " + t.entry.toFixed(2), "#F5B642", -1], [xOfT(p, T1), y(le.price), "EXIT " + le.price.toFixed(2) + "  " + fR(t.R), t.R >= 0 ? "#2EC4A6" : "#F0707A", 1]].forEach(([x, yy, txt, c, sd]) => {
+    ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, yy, 6, 0, 6.3); ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+    const w = ctx.measureText(txt).width + 14, bx = Math.max(4, Math.min(p.map.pw - w - 4, sd < 0 ? x - w - 12 : x + 12));
+    ctx.fillStyle = c; ctx.fillRect(bx, yy - 11, w, 22); ctx.fillStyle = "#1a1200"; ctx.fillText(txt, bx + 7, yy);
+  });
+  ctx.restore();
+}
+function drawFills0(p, ctx, y, t) {
   const T0 = Tof(t.date, t.openMs); if (T0 == null) return;
   const x0 = xOfT(p, T0), y0 = y(t.entry), d = dirOf(t), col = d > 0 ? "#1a7f37" : "#c62828";
   ctx.save();
@@ -1615,11 +1663,11 @@ function updateCard(force) {
   const live_ = q("cLive");
   if (st === "open") {
     const risk = t.risk, r = d * (lastPrice - t.entry) / risk, tot = t.realized + t.remaining * r;
-    live_.innerHTML = 'Now <b class="' + (r >= 0 ? "pos" : "neg") + '">' + fR(r) + "</b> on " + Math.round(t.remaining * 100) + "% · locked in <b>" + fR(t.realized) + "</b> · total <b class=\"" + (tot >= 0 ? "pos" : "neg") + '">' + fR(tot) + "</b>";
+    live_.innerHTML = 'Now <b class="' + (r >= 0 ? "pos" : "neg") + '">' + fR(r) + "</b> (" + (d * (lastPrice - t.entry) >= 0 ? "+" : "") + f2(d * (lastPrice - t.entry)) + " pts) on " + Math.round(t.remaining * 100) + "% · locked in <b>" + fR(t.realized) + "</b> · total <b class=\"" + (tot >= 0 ? "pos" : "neg") + '">' + fR(tot) + "</b>";
   } else if (st === "closed") {
     live_.innerHTML = 'Result <b class="' + (t.R >= 0 ? "pos" : "neg") + '">' + fR(t.R) + "</b> · MFE " + fR(t.mfe) + " · MAE " + fR(t.mae);
     q("cExits").innerHTML = '<div class="sec"><b>Exits</b>' + t.exits.map(e => '<div class="row"><span>' + msLabel(e.ms) + "</span><span>" + e.price.toFixed(2) + "</span><span>" + Math.round(e.frac * 100) + "%</span><b class=\"" + (e.R >= 0 ? "pos" : "neg") + '">' + fR(e.R) + "</b><small>" + esc(e.why) + "</small></div>").join("") + "</div>";
-  } else live_.innerHTML = st === "draft" ? "<small>Drag the lines on the chart, or type the prices.</small>" : "<small>Fills when the price reaches the entry.</small>";
+  } else live_.innerHTML = st === "draft" ? "<small>Drag the lines on the chart, or type the prices.<br><b>Market order by default.</b> For a limit or stop order, drag the blue entry line to the price you want (or type it in Entry). A buy below the price is a limit order and above it a stop order; for a sell it is the other way round.</small>" : "<small>Fills when the price reaches the entry.</small>";
   if (st !== "closed") {
     const ent = st === "draft" && t.follow ? lastPrice : t.entry;
     const setv = (id, v) => { const i = q(id); if (i && document.activeElement !== i) i.value = v == null ? "" : (Math.round(v * 100) / 100); };
@@ -1818,16 +1866,20 @@ function statsOf(list) {
 let repTab = "sum", repTags = [], repAll = true;
 function openReport() { closeRing(); closeCard(); $("report").hidden = false; renderReport(); }
 function closeReport() { $("report").hidden = true; }
+function heroOf(s) {
+  const h = (k, v, c) => '<div><small>' + k + '</small><b class="' + (c || "") + '">' + v + "</b></div>";
+  return '<div class="hero">' + h("Total result", fR(s.total), cls(s.total)) + h("Win rate", (s.winRate * 100).toFixed(0) + "%") + h("Average per trade", fR(s.avg), cls(s.avg)) + h("Trades", s.n) + "</div>";
+}
 function renderReport() {
   const el = $("report"), all = closedTrades(), list = all.filter(t => !t.fp), plist = all.filter(t => t.fp);
-  el.innerHTML = '<div id="rhead">' + [["sum", "Summary"], ["setup", "By setup"], ["time", "By time"], ["proc", "Process"], ["list", "Trades"], ["prac", "Practice results"]].map(([k, l]) => '<button class="' + (repTab === k ? "on" : "") + '" data-tab="' + k + '">' + l + "</button>").join("") +
+  el.innerHTML = '<div id="rhead"><b class="rt">Journal</b>' + [["sum", "Summary"], ["setup", "By setup"], ["time", "By time"], ["proc", "Process"], ["list", "Trades"], ["prac", "Focused practice results"]].map(([k, l]) => '<button class="' + (repTab === k ? "on" : "") + '" data-tab="' + k + '">' + l + "</button>").join("") +
     '<span class="grow"></span><button id="rClear">Clear</button><button id="rCsv">CSV</button><button id="rCopy">Copy</button><button id="rX">✕</button></div><div id="rbody"></div>';
   el.querySelectorAll("[data-tab]").forEach(b => { b.onclick = () => { repTab = b.dataset.tab; renderReport(); }; });
   $("rX").onclick = closeReport;
   $("rClear").onclick = () => { if (confirm("Clear the whole journal? All finished trades will be deleted. This cannot be undone.")) { trades = trades.filter(t => t.state !== "closed"); saveTrades(); refreshLive(); renderReport(); toast("Journal cleared"); } }; $("rCsv").onclick = () => exportCsv(list); $("rCopy").onclick = () => copyCsv(list);
   const body = $("rbody");
   if (repTab === "prac") { renderPractice(body, plist); return; }
-  if (!list.length) { body.innerHTML = "<p style='color:#5d6670'>No finished trades yet. Open the menu, tap Trade, set the stop (and a target if you want) and place an order. Every result is counted in R: 1R is the distance from your entry to your first stop.</p>"; return; }
+  if (!list.length) { body.innerHTML = "<p style='color:#8CA0BA'>No finished trades yet. Open the menu, tap Trade, set the stop (and a target if you want) and place an order. Every result is counted in R: 1R is the distance from your entry to your first stop.</p>"; return; }
   if (repTab === "sum") renderSummary(body, list);
   else if (repTab === "setup") renderSetup(body, list);
   else if (repTab === "time") body.innerHTML = groupTable("Entry time", list, t => { const b = Math.floor((t.openMs || 0) / 1800000); return msLabel(b * 1800000) + " – " + msLabel(b * 1800000 + 1800000); }, (a, b) => a.key.localeCompare(b.key));
@@ -1837,8 +1889,7 @@ function renderReport() {
 const cls = v => (v > 0.005 ? "pos" : v < -0.005 ? "neg" : "");
 function renderSummary(body, list) {
   const s = statsOf(list), kc = (k, v, c) => '<div class="kc"><div class="k">' + k + '</div><div class="v ' + (c || "") + '">' + v + "</div></div>";
-  body.innerHTML = '<div class="cards">' + kc("Trades", s.n) + kc("Total", fR(s.total), cls(s.total)) + kc("Average per trade", fR(s.avg), cls(s.avg)) +
-    kc("Win rate", (s.winRate * 100).toFixed(0) + "%") + kc("Wins / losses / flat", s.wins + " / " + s.losses + " / " + s.be) +
+  body.innerHTML = heroOf(s) + '<div class="cards">' + kc("Wins / losses / flat", s.wins + " / " + s.losses + " / " + s.be) +
     kc("Average win", fR(s.avgWin), "pos") + kc("Average loss", fR(s.avgLoss), "neg") + kc("Profit factor", s.pf === Infinity ? "∞" : f2(s.pf)) +
     kc("Biggest drop", "-" + f2(s.dd) + "R", "neg") + kc("Longest losing run", s.ms) + kc("Best / worst", fR(s.best) + " / " + fR(s.worst)) + "</div>" +
     '<canvas id="eq"></canvas>' + groupTable("Side", list, t => (t.side === "L" ? "Long" : "Short"), (a, b) => a.key.localeCompare(b.key));
@@ -1848,14 +1899,15 @@ function renderSummary(body, list) {
   const W = r.width, Hh = r.height, pts = [0]; let cum = 0; for (const t of list) { cum += t.R; pts.push(cum); }
   const lo = Math.min(0, ...pts), hi = Math.max(0, ...pts), pad = 22, rng = (hi - lo) || 1;
   const X = i => pad + (W - pad - 10) * (list.length ? i / list.length : 0), Y = v => 10 + (Hh - 30) * (1 - (v - lo) / rng);
-  c.strokeStyle = "#c9ced6"; c.lineWidth = 1; c.beginPath(); c.moveTo(pad, Y(0)); c.lineTo(W - 6, Y(0)); c.stroke();
-  c.fillStyle = "#5d6670"; c.font = "10px system-ui,sans-serif"; c.textAlign = "left"; c.fillText("0R", 2, Y(0) - 2); c.fillText(f2(hi) + "R", 2, 10); c.fillText("Cumulative R by trade", pad + 4, Hh - 4);
-  c.strokeStyle = cum >= 0 ? "#1a7f37" : "#c62828"; c.lineWidth = 2; c.beginPath(); pts.forEach((v, i) => { if (i) c.lineTo(X(i), Y(v)); else c.moveTo(X(i), Y(v)); }); c.stroke();
+  c.strokeStyle = "#2a3b57"; c.lineWidth = 1; c.beginPath(); c.moveTo(pad, Y(0)); c.lineTo(W - 6, Y(0)); c.stroke();
+  c.fillStyle = "#8CA0BA"; c.font = "10px system-ui,sans-serif"; c.textAlign = "left"; c.fillText("0R", 2, Y(0) - 2); c.fillText(f2(hi) + "R", 2, 10); c.fillText("Cumulative R by trade", pad + 4, Hh - 4);
+  c.strokeStyle = cum >= 0 ? "#2EC4A6" : "#F0707A"; c.lineWidth = 2; c.beginPath(); pts.forEach((v, i) => { if (i) c.lineTo(X(i), Y(v)); else c.moveTo(X(i), Y(v)); }); c.stroke();
+  c.lineTo(X(pts.length - 1), Y(0)); c.lineTo(X(0), Y(0)); c.closePath(); { const gr = c.createLinearGradient(0, 0, 0, Hh); gr.addColorStop(0, cum >= 0 ? "rgba(46,196,166,.35)" : "rgba(240,112,122,.35)"); gr.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = gr; c.fill(); }
 }
 function renderSetup(body, list) {
   const all = Array.from(new Set(list.reduce((a, t) => a.concat(tagsOf(t)), []))).sort(), sel = repTags.filter(k => all.indexOf(k) >= 0);
-  const chip = on => "border:1px solid " + (on ? "#1a5fb4" : "#c9ced6") + ";background:" + (on ? "#1a5fb4" : "#fff") + ";color:" + (on ? "#fff" : "#222") + ";border-radius:20px;padding:5px 13px;margin:0 6px 6px 0;font:inherit;cursor:pointer";
-  body.innerHTML = "<p style='color:#5d6670;margin-top:0'>Tap one or more tags to see only the trades that have them. Below, a trade with several tags is counted under each of its tags.</p><div id='rtags'>" +
+  const chip = on => "border:1px solid " + (on ? "#F5B642" : "#24395A") + ";background:" + (on ? "#F5B642" : "#13233A") + ";color:" + (on ? "#1a1200" : "#E8EEF6") + ";border-radius:20px;padding:5px 13px;margin:0 6px 6px 0;font:inherit;cursor:pointer";
+  body.innerHTML = "<p style='color:#8CA0BA;margin-top:0'>Tap one or more tags to see only the trades that have them. Below, a trade with several tags is counted under each of its tags.</p><div id='rtags'>" +
     all.map(k => '<button data-k="' + esc(k) + '" style="' + chip(sel.indexOf(k) >= 0) + '">' + esc(k) + "</button>").join("") +
     (sel.length ? '<button data-clear="1" style="' + chip(false) + '">Clear</button>' : "") + "</div>" +
     (sel.length > 1 ? "<div style='margin:4px 0 10px'>Match: <button data-m='1' style='" + chip(repAll) + "'>All selected tags</button><button data-m='0' style='" + chip(!repAll) + "'>Any selected tag</button></div>" : "") + "<div id='rsel'></div><div id='rgrp'></div>";
@@ -1864,19 +1916,19 @@ function renderSetup(body, list) {
   body.querySelectorAll("[data-m]").forEach(b => { b.onclick = () => { repAll = b.dataset.m === "1"; renderSetup(body, list); }; });
   if (sel.length) {
     const sub = list.filter(t => { const tg = tagsOf(t); return repAll ? sel.every(k => tg.indexOf(k) >= 0) : sel.some(k => tg.indexOf(k) >= 0); }), box = $("rsel");
-    if (!sub.length) box.innerHTML = "<p style='color:#5d6670'>No trades have " + (repAll ? "all of " : "any of ") + "these tags: " + sel.map(esc).join(" + ") + ".</p>";
-    else { const st = statsOf(sub); box.innerHTML = '<div style="border:1px solid #d8dde3;border-radius:12px;padding:12px 16px;margin-bottom:12px"><b>' + sel.map(esc).join(" + ") + "</b> (" + (repAll ? "all tags" : "any tag") + "): " + st.n + " trades, total <span class=\"" + cls(st.total) + '">' + fR(st.total) + "</span>, average <span class=\"" + cls(st.avg) + '">' + fR(st.avg) + "</span>, win rate " + (st.winRate * 100).toFixed(0) + "%</div><div id='rsub'></div>"; renderList($("rsub"), sub); }
+    if (!sub.length) box.innerHTML = "<p style='color:#8CA0BA'>No trades have " + (repAll ? "all of " : "any of ") + "these tags: " + sel.map(esc).join(" + ") + ".</p>";
+    else { const st = statsOf(sub); box.innerHTML = '<div style="border:1px solid #24395A;border-radius:12px;padding:12px 16px;margin-bottom:12px"><b>' + sel.map(esc).join(" + ") + "</b> (" + (repAll ? "all tags" : "any tag") + "): " + st.n + " trades, total <span class=\"" + cls(st.total) + '">' + fR(st.total) + "</span>, average <span class=\"" + cls(st.avg) + '">' + fR(st.avg) + "</span>, win rate " + (st.winRate * 100).toFixed(0) + "%</div><div id='rsub'></div>"; renderList($("rsub"), sub); }
   }
   $("rgrp").innerHTML = groupTable("Setup", list, t => (tagsOf(t).length ? tagsOf(t) : "(no setup)"), (a, b) => b.stat.total - a.stat.total);
 }
 let repPrac = null;
 function renderPractice(body, plist) {
-  const guide = '<details open style="border:1px solid #d8dde3;border-radius:12px;padding:12px 16px;margin-bottom:14px"><summary style="cursor:pointer;font-weight:700;font-size:15px">How focused practice works</summary><ol style="margin:10px 0 4px 18px;padding:0;color:#3d4650;line-height:1.55"><li>Open <b>Focused practice</b> in the top bar and switch the mode to <b>Focused practice</b>.</li><li>Choose the one setup you want to train, for example Wedge top, Breakout or High 2 (H2).</li><li>Trade only that setup. Every trade you take while the mode is on is saved here, and it does not enter your normal journal.</li><li>Come back to this tab and click a setup to see its trades, win rate and results in R.</li><li>Switch back to <b>Free practice</b> at any time. Your normal journal stays as it is.</li></ol><p style="margin:8px 0 0;color:#5d6670">Tip: take at least 20 trades of one setup before you judge it. Pattern detection is planned for later.</p></details>';
-  const mode = '<div style="margin-bottom:12px;color:#3d4650">Mode now: <b>' + (CFG.fpOn ? "Focused practice" + (CFG.fpSet ? " (" + esc(CFG.fpSet) + ")" : " (choose a setup)") : "Free practice") + "</b></div>";
-  if (!plist.length) { body.innerHTML = guide + mode + "<p style='color:#5d6670'>No practice trades yet.</p>"; return; }
+  const guide = '<details open style="border:1px solid #24395A;border-radius:12px;padding:12px 16px;margin-bottom:14px"><summary style="cursor:pointer;font-weight:700;font-size:15px">How focused practice works</summary><ol style="margin:10px 0 4px 18px;padding:0;color:#c3d0e2;line-height:1.55"><li>Open <b>Focused practice</b> in the top bar and switch the mode to <b>Focused practice</b>.</li><li>Choose the one setup you want to train, for example Wedge top, Breakout or High 2 (H2).</li><li>Trade only that setup. Every trade you take while the mode is on is saved here, and it does not enter your normal journal.</li><li>Come back to this tab and click a setup to see its trades, win rate and results in R.</li><li>Switch back to <b>Free practice</b> at any time. Your normal journal stays as it is.</li></ol><p style="margin:8px 0 0;color:#8CA0BA">Tip: take at least 20 trades of one setup before you judge it. Pattern detection is planned for later.</p></details>';
+  const mode = '<div style="margin-bottom:12px;color:#c3d0e2">Mode now: <b>' + (CFG.fpOn ? "Focused practice" + (CFG.fpSet ? " (" + esc(CFG.fpSet) + ")" : " (choose a setup)") : "Free practice") + "</b></div>";
+  if (!plist.length) { body.innerHTML = guide + mode + "<p style='color:#8CA0BA'>No practice trades yet.</p>"; return; }
   if (repPrac && plist.some(t => t.fp === repPrac)) {
     const sub = plist.filter(t => t.fp === repPrac), st = statsOf(sub);
-    body.innerHTML = guide + mode + '<button id="pBack" style="border:1px solid #c9ced6;background:#fff;border-radius:20px;padding:5px 14px;font:inherit;cursor:pointer;margin-bottom:10px">← All setups</button><div style="border:1px solid #d8dde3;border-radius:12px;padding:12px 16px;margin-bottom:12px"><b>' + esc(repPrac) + "</b>: " + st.n + " trades, total <span class=\"" + cls(st.total) + '">' + fR(st.total) + "</span>, average <span class=\"" + cls(st.avg) + '">' + fR(st.avg) + "</span>, win rate " + (st.winRate * 100).toFixed(0) + '%</div><div id="pList"></div>';
+    body.innerHTML = guide + mode + '<button id="pBack" style="border:1px solid #2a3b57;background:#13233A;color:#E8EEF6;border-radius:20px;padding:5px 14px;font:inherit;cursor:pointer;margin-bottom:10px">← All setups</button><div style="border:1px solid #24395A;border-radius:12px;padding:12px 16px;margin-bottom:12px"><b>' + esc(repPrac) + "</b>: " + st.n + " trades, total <span class=\"" + cls(st.total) + '">' + fR(st.total) + "</span>, average <span class=\"" + cls(st.avg) + '">' + fR(st.avg) + "</span>, win rate " + (st.winRate * 100).toFixed(0) + '%</div><div id="pList"></div>';
     $("pBack").onclick = () => { repPrac = null; renderPractice(body, plist); }; renderList($("pList"), sub); return;
   }
   const g = new Map(); for (const t of plist) (g.get(t.fp) || g.set(t.fp, []).get(t.fp)).push(t);
@@ -1892,7 +1944,7 @@ function renderProcess(body, list) {
   const ws = worst(bySetup), be = best(bySetup), we = worst(byEmo);
   const line = (lab, o) => '<div style="margin:6px 0"><b>' + lab + ":</b> " + (o ? esc(o.k) + " (" + fR(o.avg) + " avg over " + o.n + " trades)" : "not enough rated trades yet (3 needed per group)") + "</div>";
   const plan = v => { const l = list.filter(t => t.plan === v); return l.length ? fR(avgOf(l)) + " avg over " + l.length + " trades" : "no rated trades"; };
-  body.innerHTML = '<div style="border:1px solid #d8dde3;border-radius:12px;padding:14px 16px;margin-bottom:14px"><b style="font-size:16px">Weakness finder</b>' + line("Find your edge (best setup)", be) + line("Your weakest setup", ws && ws.avg < 0 ? ws : null) + line("Your costliest emotion", we && we.avg < 0 ? we : null) +
+  body.innerHTML = '<div style="border:1px solid #24395A;border-radius:12px;padding:14px 16px;margin-bottom:14px"><b style="font-size:16px">Weakness finder</b>' + line("Find your edge (best setup)", be) + line("Your weakest setup", ws && ws.avg < 0 ? ws : null) + line("Your costliest emotion", we && we.avg < 0 ? we : null) +
     '<div style="margin:6px 0"><b>Followed the plan:</b> ' + plan(1) + "<br><b>Broke the plan:</b> " + plan(0) + '</div><div style="margin:6px 0"><b>Revenge trades:</b> ' + list.filter(t => t.rev).length + "</div></div>" +
     groupTable("Emotion", list, t => t.emo || "(not rated)", (a, b) => a.stat.avg - b.stat.avg) + "<br>" +
     groupTable("Plan", list, t => t.plan === 1 ? "Followed the plan" : t.plan === 0 ? "Broke the plan" : "(not rated)", (a, b) => a.stat.avg - b.stat.avg) + "<br>" +
@@ -1903,12 +1955,12 @@ function groupTable(title, list, keyFn, sortFn) {
   const rows = [...g.entries()].map(([key, l]) => ({ key, stat: statsOf(l) })).sort(sortFn);
   const mx = Math.max(0.0001, ...rows.map(r => Math.abs(r.stat.total)));
   return '<table class="t"><tr><th>' + title + "</th><th>Trades</th><th>Win %</th><th>Total R</th><th>Avg R</th><th></th></tr>" +
-    rows.map(r => '<tr><td>' + esc(r.key) + "</td><td>" + r.stat.n + "</td><td>" + (r.stat.winRate * 100).toFixed(0) + "%</td><td class=\"" + cls(r.stat.total) + '">' + fR(r.stat.total) + "</td><td class=\"" + cls(r.stat.avg) + '">' + fR(r.stat.avg) + '</td><td style="text-align:left"><span class="bar" style="width:' + Math.round(Math.abs(r.stat.total) / mx * 70) + "px;background:" + (r.stat.total >= 0 ? "#1a7f37" : "#c62828") + '"></span></td></tr>').join("") + "</table><br>";
+    rows.map(r => '<tr><td>' + esc(r.key) + "</td><td>" + r.stat.n + "</td><td>" + (r.stat.winRate * 100).toFixed(0) + "%</td><td class=\"" + cls(r.stat.total) + '">' + fR(r.stat.total) + "</td><td class=\"" + cls(r.stat.avg) + '">' + fR(r.stat.avg) + '</td><td style="text-align:left"><span class="bar" style="width:' + Math.round(Math.abs(r.stat.total) / mx * 70) + "px;background:" + (r.stat.total >= 0 ? "#2EC4A6" : "#F0707A") + '"></span></td></tr>').join("") + "</table><br>";
 }
 function renderList(body, list) {
-  body.innerHTML = '<table class="t"><tr><th>Date</th><th>Time</th><th>Side</th><th>Setup</th><th>R</th><th>Exits</th></tr>' +
-    list.slice().reverse().map(t => '<tr data-id="' + t.id + '" style="cursor:pointer"><td>' + t.date + "</td><td>" + msLabel(t.openMs || 0) + "</td><td>" + (t.side === "L" ? "Long" : "Short") + "</td><td>" + esc(tagsOf(t).join(", ")) + '</td><td class="' + cls(t.R) + '">' + fR(t.R) + "</td><td>" + t.exits.map(e => esc(e.why)).join(", ") + "</td></tr>").join("") + "</table><p style='color:#5d6670'>Tap a trade to change its setup or note, or to delete it.</p>";
-  body.querySelectorAll("tr[data-id]").forEach(r => { r.onclick = () => { const t = trades.find(x => x.id === r.dataset.id); if (t) { closeReport(); openCard(t); } }; });
+  body.innerHTML = '<table class="t"><tr><th>Date</th><th>Time</th><th>Side</th><th>Setup</th><th>R</th><th>Exits</th><th>Notes</th></tr>' +
+    list.slice().reverse().map(t => '<tr data-id="' + t.id + '" style="cursor:pointer"><td>' + t.date + "</td><td>" + msLabel(t.openMs || 0) + "</td><td>" + (t.side === "L" ? "Long" : "Short") + "</td><td>" + esc(tagsOf(t).join(", ")) + '</td><td class="' + cls(t.R) + '">' + fR(t.R) + "</td><td>" + t.exits.map(e => esc(e.why)).join(", ") + "</td><td style=\"text-align:left;white-space:normal;max-width:300px;color:#8CA0BA\">" + esc(t.note || "") + "</td></tr>").join("") + "</table><p style='color:#8CA0BA'>Tap a trade to change its setup or note, or to delete it.</p>";
+  body.querySelectorAll("tr[data-id]").forEach(r => { r.onclick = () => { const t = trades.find(x => x.id === r.dataset.id); if (t) { showTradeOnChart(t); } }; });
 }
 function csvOf(list) {
   const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
@@ -1979,24 +2031,36 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   const top = E("div"), rail = E("div"); top.id = "dtop"; rail.id = "drail"; document.body.append(top, rail);
   const B = (t, title, f, cls) => { const b = E("button", cls || "", t); b.title = title; b.onclick = f; return b; };
   const sep = () => E("span", "dsep");
-  const shot = () => main.cv.toBlob(b => { const a = E("a"); a.href = URL.createObjectURL(b); a.download = "barbybar-" + (days[dayIdx] ? days[dayIdx].date : "chart") + ".png"; a.click(); });
+  const shot = () => main.cv.toBlob(b => { const a = E("a"); a.href = URL.createObjectURL(b); a.download = "baarina-" + (days[dayIdx] ? days[dayIdx].date : "chart") + ".png"; a.click(); });
   // ----- top bar
-  const a = E("a", "", '<img src="icon-192.png" alt="">BarByBar'); a.href = "../"; a.title = "Back to the website"; top.append(a, sep());
-  const dl = E("span"); dl.id = "ddate";
-  top.append(B("◀", "Previous day", () => goDay(dayIdx - 1)), dl, B("▶", "Next day", () => goDay(dayIdx + 1)), B("📅", "Pick a date", pickDate), B("⟲", "Restart the day", () => goDay(dayIdx)), sep());
-  const tfs = E("select"); tfs.title = "Timeframe"; TFS.forEach(t => tfs.add(new Option(TF_LABEL[t], t))); tfs.onchange = () => setMainTf(+tfs.value); top.append(tfs, sep());
-  const pl = B("▶ Play", "Play / pause", togglePlay); top.append(pl, B("⏭ Next bar", "Close this bar and go to the next", nextBar));
-  const sp = E("select"); sp.title = "Speed"; [1, 5, 10, 30, 60, 150, 400].forEach(v => sp.add(new Option(v + "x", v))); sp.onchange = () => { speed = +sp.value; S.speed = speed; saveSettings(); }; top.append(sp, sep());
-  const ib = B("ƒx Indicators ▾", "Indicators", e => { e.stopPropagation(); if (!imenu.hidden) { imenu.hidden = true; return; } showInd(ib); }); const prb = B("Focused practice ▾", "Free or focused practice, daily challenge, streak", e => { e.stopPropagation(); showPrac(prb); }); top.append(ib, prb, E("span", "dsp"));
+  const a = E("a", "", '<img src="icon-192.png" alt="">Baarina'); a.href = "../"; a.title = "Back to the website"; top.append(a, sep());
+  const dl = E("button", "", ""); dl.id = "ddate"; dl.title = "Pick a date"; dl.onclick = pickDate;
+  top.append(B("◀", "Previous day", () => goDay(dayIdx - 1)), dl, B("▶", "Next day", () => goDay(dayIdx + 1)), B("⟲", "Restart the day", () => goDay(dayIdx)), sep());
+  const ddm = E("div"); ddm.id = "ddm"; ddm.hidden = true; document.body.append(ddm); ddm.onclick = e => e.stopPropagation();
+  function mkDd(title, opts, get, pick) {
+    const b = E("button", "dd"); b.title = title;
+    b._lab = () => { const o = opts.find(x => x[0] === get()); b.textContent = (o ? o[1] : "") + " ▾"; };
+    b.onclick = e => { e.stopPropagation(); if (!ddm.hidden && ddm._b === b) { ddm.hidden = true; return; } const r = b.getBoundingClientRect(); ddm.innerHTML = ""; ddm._b = b;
+      opts.forEach(([v, n]) => { const x = E("button", get() === v ? "on" : "", (get() === v ? "✓  " : "      ") + n); x.onclick = () => { ddm.hidden = true; pick(v); b._lab(); }; ddm.append(x); });
+      ddm.style.left = r.left + "px"; ddm.style.top = r.bottom + 6 + "px"; ddm.hidden = false; };
+    b._lab(); return b;
+  }
+  const tfs = mkDd("Timeframe", TFS.map(t => [t, TF_LABEL[t]]), () => main.tf, v => setMainTf(v)); top.append(tfs, sep());
+  const ICN = d => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px">' + d + "</svg>", ICON_NEXT = ICN('<path d="M4 12h12"/><path d="m11 6 6 6-6 6"/><path d="M20 5v14"/>'), ICON_LATEST = ICN('<path d="m6 17 5-5-5-5"/><path d="m13 17 5-5-5-5"/>');
+  const pl = B("▶ Play", "Play / pause", togglePlay); top.append(pl, B(ICON_NEXT + " Next bar", "Close this bar and go to the next", nextBar));
+  const sp = mkDd("Replay speed", [1, 5, 10, 30, 60, 150, 400].map(v => [v, v + "x"]), () => speed, v => { speed = v; S.speed = v; saveSettings(); }); top.append(sp, sep());
+  const ib = B("Indicators ▾", "Indicators", e => { e.stopPropagation(); if (!imenu.hidden) { imenu.hidden = true; return; } showInd(ib); }); const prb = B("Practice mode: normal ▾", "Switch between normal and focused practice", e => { e.stopPropagation(); showPrac(prb); }); top.append(ib, prb, E("span", "dsp"));
   const mb = B("Manage trades", "Open trades and orders", e => { e.stopPropagation(); showMtp(mb); });
-  top.append(B("📈 New trade", "Open the trade window for a new order", () => openTradeCard(), "acc"), mb, B("📒 Journal", "Trade journal and stats", openReport), sep(), B("⚙", "Chart settings", () => openSettings(0)), B("📷", "Save a picture of the chart", shot), B("⛶", "Full screen", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()));
+  top.append(B("📈 New trade", "Open the trade window for a new order", () => openTradeCard(), "acc"), mb, B("📒 Journal", "Trade journal and stats", openReport), sep(), B("⚙", "Chart settings", () => openSettings(0)), B("⛶", "Full screen", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()));
   // ----- indicators (EMA, ATR)
   const ATR = () => CFG.atr || (CFG.atr = { on: 0, len: 14, sm: "rma", col: "#F5B642" });
   const imenu = E("div"); imenu.id = "imenu"; imenu.hidden = true; document.body.append(imenu);
   function showInd(btn) {
+    const tp = LP || main, ema = tp.ema != null ? tp.ema : S.ema !== false, atr = tp.atr != null ? tp.atr : !!ATR().on;
     imenu.innerHTML = ""; const r = btn.getBoundingClientRect(); imenu.style.left = r.left + "px"; imenu.style.top = r.bottom + 6 + "px";
-    const e1 = E("button", "", "<span>" + (S.ema !== false ? "✓ " : "    ") + "EMA 20</span>"); e1.onclick = e => { e.stopPropagation(); S.ema = S.ema === false; saveSettings(); showInd(btn); };
-    const e2 = E("button", "", "<span>" + (ATR().on ? "✓ " : "    ") + "ATR (" + ATR().len + ")</span><span>⚙</span>"); e2.onclick = e => { e.stopPropagation(); if (e.target.textContent === "⚙") { imenu.hidden = true; openAtr(); } else { ATR().on = ATR().on ? 0 : 1; saveCfg(); showInd(btn); } };
+    imenu.append(E("i", "", "For chart " + (panels.indexOf(tp) + 1) + (panels.length > 1 ? " (the chart you used last)" : "")));
+    const e1 = E("button", "", "<span>" + (ema ? "✓ " : "    ") + "EMA 20</span>"); e1.onclick = e => { e.stopPropagation(); tp.ema = !ema; showInd(btn); redraw(); };
+    const e2 = E("button", "", "<span>" + (atr ? "✓ " : "    ") + "ATR (" + ATR().len + ")</span><span>⚙</span>"); e2.onclick = e => { e.stopPropagation(); if (e.target.textContent === "⚙") { imenu.hidden = true; openAtr(); } else { tp.atr = atr ? 0 : 1; showInd(btn); } };
     imenu.append(e1, e2); imenu.hidden = false;
   }
   function openAtr() { const A = ATR(); shell("ATR settings", ["Inputs"], 0, () => { }, body => body.append(R("Length", num(A.len, v => { A.len = Math.max(1, Math.min(200, v || 14)); saveCfg(); }, 1, 200)), R("Smoothing", sel([["rma", "RMA (Wilder)"], ["sma", "SMA"], ["ema", "EMA"]], A.sm, v => { A.sm = v; saveCfg(); })), R("Show on the chart", chk(A.on, v => { A.on = v ? 1 : 0; saveCfg(); })), R("Label color", clr(A.col, v => { A.col = v; saveCfg(); })))); }
@@ -2011,8 +2075,8 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   function fillMtp() {
     const L = live.filter(t => t.state === "open" || t.state === "pending"); const f = v => v == null || v === 0 ? "-" : (+v).toFixed(2);
     let h = "<table><thead><tr><th>Side</th><th>Status</th><th>Entry</th><th>Stop</th><th>Target</th><th>Now</th><th>Left</th><th></th></tr></thead><tbody>";
-    L.forEach((t, i) => { const d = dirOf(t), risk = t.risk || Math.abs(t.entry - t.sl) || 1, r = t.state === "open" ? d * (lastPrice - t.entry) / risk : null;
-      h += '<tr data-i="' + i + '"><td class="' + (d > 0 ? "buy" : "sell") + '">' + (d > 0 ? "Buy" : "Sell") + '</td><td>' + (t.state === "open" ? "Open" : "Order (" + (t.type || "limit") + ")") + "</td><td>" + f(t.entry) + "</td><td>" + f(t.sl) + "</td><td>" + f(t.tp) + "</td><td>" + (r == null ? "-" : (r >= 0 ? "+" : "") + r.toFixed(2) + " R") + "</td><td>" + (t.state === "open" ? Math.round((t.remaining == null ? 1 : t.remaining) * 100) + "%" : "-") + '</td><td><button class="mc" data-c="' + i + '">' + (t.state === "open" ? "Close" : "Cancel") + "</button></td></tr>"; });
+    L.forEach((t, i) => { const d = dirOf(t), risk = t.risk || Math.abs(t.entry - t.sl) || 1, r = t.state === "open" ? d * (lastPrice - t.entry) / risk : null, pt = t.state === "open" ? d * (lastPrice - t.entry) : null;
+      h += '<tr data-i="' + i + '"><td class="' + (d > 0 ? "buy" : "sell") + '">' + (d > 0 ? "Buy" : "Sell") + '</td><td>' + (t.state === "open" ? "Open" : "Order (" + (t.type || "limit") + ")") + "</td><td>" + f(t.entry) + "</td><td>" + f(t.sl) + "</td><td>" + f(t.tp) + "</td><td>" + (r == null ? "-" : (pt >= 0 ? "+" : "") + pt.toFixed(2) + " pts (" + (r >= 0 ? "+" : "") + r.toFixed(2) + " R)") + "</td><td>" + (t.state === "open" ? Math.round((t.remaining == null ? 1 : t.remaining) * 100) + "%" : "-") + '</td><td><button class="mc" data-c="' + i + '">' + (t.state === "open" ? "Close" : "Cancel") + "</button></td></tr>"; });
     if (!L.length) h += '<tr><td colspan="8" style="color:#8CA0BA">No open trades or orders.</td></tr>';
     mtp.innerHTML = h + "</tbody></table>"; mtp.querySelectorAll("tbody tr[data-i]").forEach(tr => tr.onclick = () => { mtp.hidden = true; openCard(L[+tr.dataset.i]); });
     mtp.querySelectorAll(".mc").forEach(b => b.onclick = e => { e.stopPropagation(); const t = L[+b.dataset.c]; if (!t) return;
@@ -2049,10 +2113,12 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   const hitPlot = (p, e) => { if (!p.map) return null; const r = p.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; return x >= 0 && y >= 0 && x < p.map.pw && y < p.map.ph ? { x, y } : null; };
   const pPt = (p, x, y) => ptOf({ T: tOfX(p, x), p: pOfY(p, y) });
   panels.forEach(p => p.cv.addEventListener("pointerdown", e => {
+    if (e.button === 1) { e.preventDefault(); e.stopImmediatePropagation(); if (tool !== "cross") setTool("cross"); return; }
     if (e.button !== 0) return; LP = p;
     if (tool === "brush") { const h = hitPlot(p, e); if (!h) return; e.stopImmediatePropagation(); BR = { p, lx: h.x, ly: h.y, o: { kind: "brush", pts: [pPt(p, h.x, h.y)] } }; addDrawing(BR.o); }
     else if (tool === "poly") { const h = hitPlot(p, e); if (!h) return; e.stopImmediatePropagation(); const pt = ptOf(magnetPoint(p, h.x, h.y)); if (!PL) { PL = { p, o: { kind: "poly", pts: [pt, pt] } }; addDrawing(PL.o); } else { PL.o.pts[PL.o.pts.length - 1] = pt; PL.o.pts.push(pt); } saveDrawings(); }
   }, true));
+  panels.forEach(p => { p.cv.addEventListener("mousedown", e => { if (e.button === 1) e.preventDefault(); }); p.cv.addEventListener("auxclick", e => { if (e.button === 1) e.preventDefault(); }); });
   addEventListener("pointermove", e => {
     if (BR) { const h = hitPlot(BR.p, e); if (h && Math.hypot(h.x - BR.lx, h.y - BR.ly) >= 3) { BR.o.pts.push(pPt(BR.p, h.x, h.y)); BR.lx = h.x; BR.ly = h.y; } }
     if (PL) { const h = hitPlot(PL.p, e); if (h) PL.o.pts[PL.o.pts.length - 1] = ptOf(magnetPoint(PL.p, h.x, h.y)); }
@@ -2185,7 +2251,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   }
   // ----- right-click menu
   const cm = E("div"); cm.id = "cmenu"; cm.hidden = true; document.body.append(cm);
-  document.addEventListener("click", () => { fly.hidden = true; cm.hidden = true; imenu.hidden = true; mtp.hidden = true; prac.hidden = true; });
+  document.addEventListener("click", () => { fly.hidden = true; cm.hidden = true; imenu.hidden = true; mtp.hidden = true; prac.hidden = true; ddm.hidden = true; });
   document.addEventListener("contextmenu", e => {
     if (!document.body.classList.contains("desk")) return;
     if (tool) { e.preventDefault(); setTool(null); return; }
@@ -2199,17 +2265,17 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     it.push([ck(S.nums, "Bar numbers"), () => { S.nums = !S.nums; saveSettings(); syncUI(); }], [ck(S.refs, "Prior day, week and month lines"), () => { S.refs = !S.refs; saveSettings(); syncUI(); }], [ck(S.multi, "3 charts"), () => { S.multi = !S.multi; saveSettings(); syncUI(); for (const q of panels) q.off = 0; }],
       [ck(vHI(p), "Trade history (this chart)"), () => { p.hi2 = !vHI(p); redraw(); }], [ck(vTL(p), "Trade lines (this chart)"), () => { p.tl = !vTL(p); redraw(); }], "-");
     if (price != null) it.push(["Add horizontal line at " + price.toFixed(2), () => addDrawing({ kind: "h", pts: [{ date: days[dayIdx].date, ms: 0, p: price }] })], ["Copy price " + price.toFixed(2), () => { if (navigator.clipboard) navigator.clipboard.writeText(price.toFixed(2)); }]);
-    it.push([DLOCK ? "Unlock drawings" : "Lock drawings", toggleLock], [DHIDE ? "Show drawings" : "Hide drawings", toggleHide], ["Remove drawings of this chart", clearAll], "-", ["Reset chart view", () => { p.off = 0; p.vz = 1; p.vo = 0; p.fix = null; }], ["Save picture", shot], ["Chart settings…", () => openSettings(0)]);
+    it.push([DLOCK ? "Unlock drawings" : "Lock drawings", toggleLock], [DHIDE ? "Show drawings" : "Hide drawings", toggleHide], ["Remove drawings of this chart", clearAll], "-", ["Reset chart view", () => { p.off = 0; p.vz = 1; p.vo = 0; p.fix = null; }], ["Chart settings…", () => openSettings(0)]);
     cm.innerHTML = ""; it.forEach(q => { if (q === "-") { cm.append(E("hr")); return; } const b = E("button", "", "<span>" + q[0] + "</span>"); b.onclick = () => { cm.hidden = true; q[1](); }; cm.append(b); });
     cm.hidden = false; cm.style.left = Math.min(e.clientX, innerWidth - 270) + "px"; cm.style.top = Math.max(4, Math.min(e.clientY, innerHeight - cm.offsetHeight - 8)) + "px";
   }, true);
   // ----- per-chart navigation buttons and indicator labels
   panels.forEach(p => {
     const box = p.cv.parentElement, n = E("div", "nav"), z = f => () => { p.visMap[p.tf] = clamp(Math.round(p.visMap[p.tf] * f), 8, 300); };
-    [["−", "Zoom out", z(1.25)], ["+", "Zoom in", z(.8)], ["⏭", "Go to the latest bar", () => { p.off = 0; }]].forEach(([t, ti, f]) => n.append(B(t, ti, f)));
+    [["−", "Zoom out", z(1.25)], ["+", "Zoom in", z(.8)], [ICON_LATEST, "Go to the latest bar", () => { p.off = 0; }]].forEach(([t, ti, f]) => n.append(B(t, ti, f)));
     box.append(n); p._ind = E("div", "ind"); box.append(p._ind);
   });
-  function indText(p) { const A = ATR(); if (!A.on) return ""; const v = atrOf(p); if (v == null) return ""; return (on1("it") ? "ATR" : "") + (on1("ii") ? "(" + A.len + ")" : "") + (on1("iv") ? " " + v.toFixed(2) : ""); }
+  function indText(p) { const A = ATR(); if (!(p.atr != null ? p.atr : A.on)) return ""; const v = atrOf(p); if (v == null) return ""; return (on1("it") ? "ATR" : "") + (on1("ii") ? "(" + A.len + ")" : "") + (on1("iv") ? " " + v.toFixed(2) : ""); }
   // ----- sync
   function upd() {
     const on = innerWidth >= 900 && matchMedia("(pointer:fine)").matches || /[?&]desk=1/.test(location.search);
@@ -2219,7 +2285,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
     panels.forEach(p => { if (p._ind) { p._ind.textContent = indText(p); p._ind.style.color = ATR().col; } });
     if (!on) { props(); return; }
     dl.textContent = days[dayIdx] ? days[dayIdx].date : ""; pl.textContent = playing ? "⏸ Pause" : "▶ Play"; pl.classList.toggle("on", !!playing);
-    tfs.value = main.tf; sp.value = speed; gb.forEach(b => b.classList.toggle("on", b._it.some(x => x[1] === tool))); gb[0].textContent = { cross: "✛", dot: "•", arrow: "➤" }[CUR];
+    tfs._lab(); sp._lab(); gb.forEach(b => b.classList.toggle("on", b._it.some(x => x[1] === tool))); gb[0].textContent = { cross: "✛", dot: "•", arrow: "➤" }[CUR];
     if (!mtp.hidden) fillMtp(); props(); updFp();
   }
   // ----- practice features (each one can be turned off in Chart settings, Practice)
@@ -2279,7 +2345,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   }
   window.fpCurrent = () => CFG.fpOn && CFG.fpSet ? CFG.fpSet : null;
   const fpDrafts = () => { trades.filter(t => t.state === "draft").forEach(t => { t.fp = window.fpCurrent(); }); };
-  function updFp() { prb.textContent = CFG.fpOn ? "🎯 Focused: " + (CFG.fpSet || "choose a setup") + " ▾" : "Focused practice ▾"; prb.classList.toggle("on", !!CFG.fpOn); }
+  function updFp() { prb.textContent = "Practice mode: " + (CFG.fpOn ? "focused" : "normal") + " ▾"; prb.classList.toggle("on", !!CFG.fpOn); }
   function modeBox() {
     const d = E("div", "pi"), on = !!CFG.fpOn, seg = E("div", "pr");
     d.append(E("b", "", "Mode"));
