@@ -21,6 +21,7 @@
 
   /* ---------- charts ---------- */
   #charts { position:fixed; inset:0; display:flex; flex-direction:row; background:#fff; }
+  .pbox.sel::after{content:"";position:absolute;inset:0;border:2px solid #F5B642;box-shadow:inset 0 0 0 1px rgba(245,182,66,.35);pointer-events:none;z-index:30}
   .pbox { position:relative; min-width:0; min-height:0; overflow:hidden; background:#fff; }
   #pbMain { flex:1 1 64%; }
   #side { display:none; flex:1 1 36%; flex-direction:column; min-width:0; min-height:0; }
@@ -180,7 +181,7 @@
   .nav button{width:28px;height:28px;border-radius:50%;background:#13233Acc;color:#E8EEF6;border:1px solid #24395A;cursor:pointer;font-size:14px;padding:0}
   #mtp,#imenu,#ddm{position:fixed;z-index:55;background:#13233A;color:#E8EEF6;border:1px solid #24395A;border-radius:12px;padding:8px;box-shadow:0 10px 34px #000a;font:13px system-ui,sans-serif}
   #mtp[hidden],#imenu[hidden],#ddm[hidden]{display:none}
-  #pracp select{width:100%;margin-top:8px;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit}#pracp .pr{display:flex;gap:6px;margin-top:6px}#pracp .pr button{flex:1;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit;cursor:pointer}#pracp .pr button.on{background:#F5B642;color:#1a1200;font-weight:700}
+  #pracp select{width:100%;margin-top:8px;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit}#pracp .pr{display:flex;gap:6px;margin-top:6px}#pracp input[type=text],#pracp input[type=date]{flex:1;min-width:0;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit}#pracp .pr button{flex:1;background:#0F1B2D;color:inherit;border:1px solid #24395A;border-radius:8px;padding:7px;font:inherit;cursor:pointer}#pracp .pr button.on{background:#F5B642;color:#1a1200;font-weight:700}
   #mtp .mc{background:#0F1B2D;color:#E8EEF6;border:1px solid #F0707A;border-radius:8px;padding:3px 10px;font:inherit;cursor:pointer}#mtp .mc:hover{background:#F0707A;color:#1a0505}
   #mtp table{border-collapse:collapse;min-width:520px}#mtp th{color:#8CA0BA;font-weight:400;text-align:left;padding:4px 10px}#mtp td{padding:7px 10px;border-top:1px solid #24395A}#mtp tbody tr{cursor:pointer}#mtp tbody tr:hover{background:#1b3358}
   .buy{color:#2EC4A6}.sell{color:#F0707A}
@@ -223,6 +224,43 @@
   #dtop .dd{border:1px solid #24395A;background:#13233A}
   #ddm{max-height:60vh;overflow:auto}
   #imenu i{display:block;color:#8CA0BA;font-size:12px;font-style:normal;padding:2px 10px 6px}
+
+
+  /* ---------- historical day finder ---------- */
+  #dayFinder{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:12px;color:var(--fg)}
+  #dayFinder .df-panel{width:min(650px,96vw);max-height:min(90dvh,820px);display:flex;flex-direction:column;overflow:hidden;background:var(--bg);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 44px rgba(0,0,0,.38)}
+  #dayFinder .df-head{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  #dayFinder .df-head b{font-size:16px;flex:1}
+  #dayFinder .df-head small{display:block;color:var(--muted);font-size:11px;font-weight:400;margin-top:2px}
+  #dayFinder .df-close{min-width:32px;width:32px;padding:0;font-size:18px;background:transparent;border:0;color:inherit}
+  #dayFinder .df-controls{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end;padding:12px 14px;border-bottom:1px solid var(--line)}
+  #dayFinder .df-f2{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #dayFinder .df-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+  #dayFinder .df-field label{font-size:11px;color:var(--muted)}
+  #dayFinder select,#dayFinder input{width:100%;min-width:0;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 8px;min-height:36px}
+  #dayFinder .df-search{min-height:36px;padding:7px 13px;background:#F5B642;border:1px solid #F5B642;color:#1a1200;font-weight:700;border-radius:7px;white-space:nowrap}
+  #dayFinder .df-status{padding:9px 14px;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line)}
+  #dayFinder .df-results{overflow:auto;min-height:100px;padding:5px 9px 10px}
+  #dayFinder .df-result{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;margin:3px 0;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg)}
+  #dayFinder .df-result:hover{border-color:#F5B642;background:color-mix(in srgb,var(--panel) 86%,#F5B642 14%)}
+  #dayFinder .df-date{width:112px;flex:none;font-weight:700;font-variant-numeric:tabular-nums}
+  #dayFinder .df-detail{flex:1;min-width:0}
+  #dayFinder .df-primary{font-weight:600}
+  #dayFinder .df-secondary{font-size:11px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+  #dayFinder .df-range{font-size:11px;color:var(--muted);white-space:nowrap}
+  #dayFinder .df-open{color:#D79A19;font-size:17px;flex:none}
+  #dayFinder .df-empty{padding:22px 12px;text-align:center;color:var(--muted)}
+  #dayFinder .df-foot{padding:8px 14px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  @media(max-width:600px){
+    #dayFinder .df-f2{grid-template-columns:1fr 1fr}
+    #dayFinder{padding:0;align-items:stretch}
+    #dayFinder .df-panel{width:100%;height:100%;max-height:100dvh;border-radius:0;border:0}
+    #dayFinder .df-controls{grid-template-columns:1fr 1fr}
+    #dayFinder .df-field:first-child{grid-column:1/-1}
+    #dayFinder .df-search{grid-column:1/-1;width:100%}
+    #dayFinder .df-date{width:96px}
+  }
+
 </style>
 </head>
 <body>
@@ -240,7 +278,7 @@
     </g>
     <path class="pl" d="M188 226 L188 246 L206 236 Z" fill="#FFB020"/>
   </svg>
-  <div class="nm">Bar<i>By</i>Bar</div>
+  <div class="nm">Baa<i>ri</i>na</div>
   <div class="sb">tick replay</div>
 </div>
 <script>(function(){var s=document.getElementById("splash");if(!s)return;function g(){if(s&&s.parentNode){s.parentNode.removeChild(s);}s=null;}s.addEventListener("pointerdown",g);setTimeout(g,3800);})();</script>
@@ -265,6 +303,37 @@
 <div id="ring" hidden><div id="ringBox"></div></div>
 <div id="card" hidden></div>
 <div id="report" hidden></div>
+<div id="dayFinder" hidden role="dialog" aria-modal="true" aria-labelledby="dfTitle">
+  <section class="df-panel">
+    <header class="df-head">
+      <div><b id="dfTitle">Find a day</b><small>Search historical sessions by day structure</small></div>
+      <button type="button" class="df-close" id="dfClose" aria-label="Close">✕</button>
+    </header>
+    <div class="df-controls">
+      <div class="df-field"><label for="dfCategory">Day category</label><select id="dfCategory">
+        <option value="1">1 — Trend from the open</option>
+        <option value="2">2 — Spike and channel</option>
+        <option value="3">3 — Trending trading range day</option>
+        <option value="4">4 — Reversal day</option>
+        <option value="5">5 — Trend resumption day</option>
+        <option value="6">6 — Trading range day</option>
+        <option value="7">7 — Stairs / broad channel trend</option>
+      </select></div>
+      <div class="df-field"><label for="dfFrom">From</label><input type="date" id="dfFrom"></div>
+      <div class="df-field"><label for="dfTo">To</label><input type="date" id="dfTo"></div>
+      <button type="button" class="df-search" id="dfSearch">Search</button>
+    </div>
+    <div class="df-controls df-f2">
+      <div class="df-field"><label for="dfDir">Direction</label><select id="dfDir"><option value="0">Any</option><option value="1">Bull day (closes up)</option><option value="-1">Bear day (closes down)</option></select></div>
+      <div class="df-field"><label for="dfSize">Day range vs ADR</label><select id="dfSize"><option value="">Any</option><option value="s">Small (under 0.8)</option><option value="n">Normal (0.8 to 1.3)</option><option value="l">Large (over 1.3)</option></select></div>
+      <div class="df-field"><label for="dfGap">Opening gap</label><select id="dfGap"><option value="">Any</option><option value="u">Gap up (over 0.3 ADR)</option><option value="d">Gap down (over 0.3 ADR)</option><option value="f">Small gap</option></select></div>
+    </div>
+    <div class="df-status" id="dfStatus">Choose a category and date range, then search.</div>
+    <div class="df-results" id="dfResults"><div class="df-empty">No search performed yet.</div></div>
+    <div class="df-foot">A category matches when it is the primary label or any additional label. Select a date to load that session into the replay chart.</div>
+  </section>
+</div>
+
 <div id="tip" hidden></div>
 <div id="toast" hidden></div>
 <input type="date" id="dateIn" aria-label="Replay day" tabindex="-1">
@@ -276,7 +345,7 @@ const DATA_BASE = (() => {
   if (q) return q.endsWith("/") ? q : q + "/";
   return "https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/";
 })();
-const VER = "4.13.0";
+const VER = "4.15.0";
 let LP = null;
 const dOn = (o, p) => (o.pid == null ? panels.indexOf(main) : o.pid) === panels.indexOf(p);
 const vTL = p => p.tl != null ? p.tl : S.showLines !== false, vHI = p => p.hi2 != null ? p.hi2 : S.showHist !== false;
@@ -1470,18 +1539,7 @@ async function showTradeOnChart(t) {
   HLT = t.id; S.showHist = true; panels.forEach(p => { p.hi2 = true; p.off = 0; }); saveSettings(); syncUI();
   toast("Entry " + t.entry.toFixed(2) + ", result " + fR(t.R) + ". The trade is marked on the chart.", 5500);
 }
-function drawFills(p, ctx, y, t) {
-  drawFills0(p, ctx, y, t);
-  if (t.id !== HLT || !t.exits.length) return;
-  const le = t.exits[t.exits.length - 1], T0 = Tof(t.date, t.openMs), T1 = Tof(t.date, le.ms); if (T0 == null || T1 == null) return;
-  ctx.save(); ctx.font = "700 11px system-ui,sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
-  [[xOfT(p, T0), y(t.entry), "ENTRY " + t.entry.toFixed(2), "#F5B642", -1], [xOfT(p, T1), y(le.price), "EXIT " + le.price.toFixed(2) + "  " + fR(t.R), t.R >= 0 ? "#2EC4A6" : "#F0707A", 1]].forEach(([x, yy, txt, c, sd]) => {
-    ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, yy, 6, 0, 6.3); ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-    const w = ctx.measureText(txt).width + 14, bx = Math.max(4, Math.min(p.map.pw - w - 4, sd < 0 ? x - w - 12 : x + 12));
-    ctx.fillStyle = c; ctx.fillRect(bx, yy - 11, w, 22); ctx.fillStyle = "#1a1200"; ctx.fillText(txt, bx + 7, yy);
-  });
-  ctx.restore();
-}
+function drawFills(p, ctx, y, t) { drawFills0(p, ctx, y, t); }
 function drawFills0(p, ctx, y, t) {
   const T0 = Tof(t.date, t.openMs); if (T0 == null) return;
   const x0 = xOfT(p, T0), y0 = y(t.entry), d = dirOf(t), col = d > 0 ? "#1a7f37" : "#c62828";
@@ -1498,9 +1556,9 @@ function drawFills0(p, ctx, y, t) {
   for (const e of t.exits) {
     const x = xOfT(p, Tof(t.date, e.ms)), yy = y(e.price);
     ctx.fillStyle = e.R > 0.005 ? "#1a7f37" : e.R < -0.005 ? "#c62828" : "#7a828c";
-    ctx.beginPath(); ctx.arc(x, yy, 3.6, 0, 6.3); ctx.fill();
-    const lab = f2(e.R) + "R" + (e.frac < 0.999 ? " ×" + Math.round(e.frac * 100) + "%" : "");
-    ctx.fillText(lab, x + 6, yy + (d > 0 ? -7 : 7));
+    ctx.beginPath();
+    if (d > 0) { ctx.moveTo(x, yy + 2); ctx.lineTo(x - 5, yy - 8); ctx.lineTo(x + 5, yy - 8); } else { ctx.moveTo(x, yy - 2); ctx.lineTo(x - 5, yy + 8); ctx.lineTo(x + 5, yy + 8); }
+    ctx.closePath(); ctx.fill();
   }
   ctx.restore();
 }
@@ -1704,6 +1762,112 @@ function chkSummary(t) {
 }
 
 
+
+// ======================================================================
+// HISTORICAL DAY FINDER — uses precomputed daylabels.json; does not alter
+// the classifier or run classification inside the replay engine.
+// ======================================================================
+const DAY_TYPE_NAMES = {
+  1: "Trend from the open",
+  2: "Spike and channel",
+  3: "Trending trading range day",
+  4: "Reversal day",
+  5: "Trend resumption day",
+  6: "Trading range day",
+  7: "Stairs / broad channel trend"
+};
+let dayLabelsData = null, dayLabelsPromise = null, dayFinderInitialised = false;
+function loadDayLabels() {
+  if (Array.isArray(dayLabelsData)) return Promise.resolve(dayLabelsData);
+  if (dayLabelsPromise) return dayLabelsPromise;
+  dayLabelsPromise = getJSON(DATA_BASE + "daylabels.json").catch(() => null).then(data => data || fetch("daylabels.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null)).then(data => {
+    if (!Array.isArray(data)) throw new Error("daylabels.json is missing or has an unexpected format");
+    dayLabelsData = data;
+    return data;
+  }).catch(err => { dayLabelsPromise = null; throw err; });
+  return dayLabelsPromise;
+}
+function openDayFinder() {
+  const box = $("dayFinder");
+  if (!box) return;
+  if (!days.length) { toast("Historical chart data is still loading. Please try again shortly."); return; }
+  if (!dayFinderInitialised && days.length) {
+    const first = days[0].date, last = days[days.length - 1].date;
+    const dt = new Date(last + "T00:00:00Z");
+    dt.setUTCFullYear(dt.getUTCFullYear() - 1);
+    const yearAgo = dt.toISOString().slice(0, 10);
+    $("dfFrom").min = first; $("dfFrom").max = last;
+    $("dfTo").min = first; $("dfTo").max = last;
+    $("dfFrom").value = yearAgo < first ? first : yearAgo;
+    $("dfTo").value = last;
+    dayFinderInitialised = true;
+  }
+  box.hidden = false;
+  $("dfStatus").textContent = "Choose a category and date range, then search.";
+  $("dfResults").innerHTML = '<div class="df-empty">Loading day labels when you search.</div>';
+  $("dfCategory").focus();
+}
+function closeDayFinder() { const box = $("dayFinder"); if (box) box.hidden = true; }
+function runDayFinderSearch() {
+  const from = $("dfFrom").value, to = $("dfTo").value, type = Number($("dfCategory").value);
+  const status = $("dfStatus"), results = $("dfResults");
+  if (!from || !to) { status.textContent = "Choose both start and end dates."; return; }
+  if (from > to) { status.textContent = "The start date must be on or before the end date."; return; }
+  status.textContent = "Loading historical labels…";
+  results.innerHTML = "";
+  loadDayLabels().then(labels => {
+    const hits = labels.filter(row => {
+      if (!row || typeof row.d !== "string" || row.d < from || row.d > to) return false;
+      if (dayOf[row.d] == null) return false; // only offer dates Baarina can replay
+      const all = Array.isArray(row.l) ? row.l.map(Number) : [];
+      if (row.p != null) all.push(Number(row.p));
+      if (!all.includes(type)) return false;
+      const f = row.f || {}, dir = Number($("dfDir").value), sz = $("dfSize").value, gp = $("dfGap").value;
+      if (dir && f.dir !== dir) return false;
+      if (sz && !(sz === "s" ? f.rng < 0.8 : sz === "n" ? f.rng >= 0.8 && f.rng <= 1.3 : f.rng > 1.3)) return false;
+      if (gp && !(gp === "u" ? f.gap > 0.3 : gp === "d" ? f.gap < -0.3 : Math.abs(f.gap) <= 0.3)) return false;
+      return true;
+    }).sort((a, b) => b.d.localeCompare(a.d));
+    status.textContent = hits.length + " matching session" + (hits.length === 1 ? "" : "s") + " · " + DAY_TYPE_NAMES[type] + " · " + from + " to " + to;
+    if (!hits.length) {
+      results.innerHTML = '<div class="df-empty">No matching replayable sessions in this date range.</div>';
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    hits.forEach(row => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "df-result";
+      const dt = document.createElement("span"); dt.className = "df-date"; dt.textContent = row.d;
+      const detail = document.createElement("span"); detail.className = "df-detail";
+      const primary = document.createElement("span"); primary.className = "df-primary";
+      const p = Number(row.p); primary.textContent = "Primary: " + (DAY_TYPE_NAMES[p] || ("Type " + p));
+      const secondary = document.createElement("span"); secondary.className = "df-secondary";
+      const extra = (Array.isArray(row.l) ? row.l.map(Number) : []).filter(n => n !== p).map(n => DAY_TYPE_NAMES[n] || ("Type " + n));
+      secondary.textContent = extra.length ? "Also: " + extra.join(" · ") : "No additional category";
+      detail.append(primary, secondary);
+      const dd = daily[row.d];
+      const range = document.createElement("span"); range.className = "df-range";
+      range.textContent = dd && Number.isFinite(dd[1]) && Number.isFinite(dd[2]) ? ((dd[1] - dd[2]) / 1000).toFixed(2) + " pts" : "";
+      const arrow = document.createElement("span"); arrow.className = "df-open"; arrow.textContent = "›";
+      b.append(dt, detail, range, arrow);
+      b.addEventListener("click", () => {
+        const i = dayOf[row.d];
+        if (i == null) { toast("This date is not available in the replay data."); return; }
+        closeDayFinder();
+        goDay(i);
+      });
+      frag.appendChild(b);
+    });
+    results.appendChild(frag);
+  }).catch(err => {
+    status.textContent = "Could not load day labels: " + err.message;
+    results.innerHTML = '<div class="df-empty">Put daylabels.json in the app folder next to index.html (or in the public data folder with index.json), then try again.</div>';
+  });
+}
+$("dfClose").addEventListener("click", closeDayFinder);
+$("dfSearch").addEventListener("click", runDayFinderSearch);
+$("dayFinder").addEventListener("click", e => { if (e.target === $("dayFinder")) closeDayFinder(); });
+$("dayFinder").addEventListener("keydown", e => { if (e.key === "Escape") closeDayFinder(); });
+
 // ======================================================================
 // FLOATING MENU (movable button + round menu like MetaTrader)
 // ======================================================================
@@ -1745,6 +1909,7 @@ function ringItems(level) {
     case "tf": return TFS.map(t => ({ ic: TF_LABEL[t], t: "", on: main.tf === t, f: () => setMainTf(t) })).concat([back]);
     case "speed": return [1, 5, 10, 30, 60, 150, 400].map(v => ({ ic: v + "x", t: "", on: speed === v, f: () => { speed = v; S.speed = v; saveSettings(); } })).concat([back]);
     case "day": return [
+      { ic: "⌕", t: "Find a day", f: openDayFinder },
       { ic: "◀", t: "Prev day", f: () => goDay(dayIdx - 1) }, { ic: "▶", t: "Next day", f: () => goDay(dayIdx + 1) },
       { ic: "📅", t: "Pick date", f: pickDate }, { ic: "⟲", t: "Restart", f: () => goDay(dayIdx) }, back];
     case "draw": return [
@@ -2035,7 +2200,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   // ----- top bar
   const a = E("a", "", '<img src="icon-192.png" alt="">Baarina'); a.href = "../"; a.title = "Back to the website"; top.append(a, sep());
   const dl = E("button", "", ""); dl.id = "ddate"; dl.title = "Pick a date"; dl.onclick = pickDate;
-  top.append(B("◀", "Previous day", () => goDay(dayIdx - 1)), dl, B("▶", "Next day", () => goDay(dayIdx + 1)), B("⟲", "Restart the day", () => goDay(dayIdx)), sep());
+  top.append(B("◀", "Previous day", () => goDay(dayIdx - 1)), dl, B("▶", "Next day", () => goDay(dayIdx + 1)), B("⟲", "Restart the day", () => goDay(dayIdx)), B("⌕ Find day", "Search historical sessions by day type", openDayFinder), sep());
   const ddm = E("div"); ddm.id = "ddm"; ddm.hidden = true; document.body.append(ddm); ddm.onclick = e => e.stopPropagation();
   function mkDd(title, opts, get, pick) {
     const b = E("button", "dd"); b.title = title;
@@ -2114,7 +2279,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   const pPt = (p, x, y) => ptOf({ T: tOfX(p, x), p: pOfY(p, y) });
   panels.forEach(p => p.cv.addEventListener("pointerdown", e => {
     if (e.button === 1) { e.preventDefault(); e.stopImmediatePropagation(); if (tool !== "cross") setTool("cross"); return; }
-    if (e.button !== 0) return; LP = p;
+    if (e.button !== 0) return; LP = p; panels.forEach(q => q.box.classList.toggle("sel", !!S.multi && q === p));
     if (tool === "brush") { const h = hitPlot(p, e); if (!h) return; e.stopImmediatePropagation(); BR = { p, lx: h.x, ly: h.y, o: { kind: "brush", pts: [pPt(p, h.x, h.y)] } }; addDrawing(BR.o); }
     else if (tool === "poly") { const h = hitPlot(p, e); if (!h) return; e.stopImmediatePropagation(); const pt = ptOf(magnetPoint(p, h.x, h.y)); if (!PL) { PL = { p, o: { kind: "poly", pts: [pt, pt] } }; addDrawing(PL.o); } else { PL.o.pts[PL.o.pts.length - 1] = pt; PL.o.pts.push(pt); } saveDrawings(); }
   }, true));
@@ -2280,6 +2445,7 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   function upd() {
     const on = innerWidth >= 900 && matchMedia("(pointer:fine)").matches || /[?&]desk=1/.test(location.search);
     document.body.classList.toggle("desk", on); S.ruleCheck = false;
+    { const sel = LP || main; panels.forEach(p => p.box.classList.toggle("sel", !!S.multi && p === sel)); }
     { const dd = days[dayIdx] && days[dayIdx].date; if (dd && typeof clock === "number") { if (clock >= SESSION_MS) { if (endKey !== dd) { endKey = dd; markPractice(dd); if (pOn("pq")) sessionCard(dd); } } else endKey = null; } }
     prb.style.display = pOn("pd") || pOn("ps") || pOn("pw") || pOn("pl") ? "" : "none";
     panels.forEach(p => { if (p._ind) { p._ind.textContent = indText(p); p._ind.style.color = ATR().col; } });
@@ -2322,7 +2488,9 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   };
   window.onOpened = (t, ms) => { if (!pOn("pt")) return; const L = closedOn(t.date), l = L.length ? L[L.length - 1] : null; if (l && l.R < 0 && ms >= (l.closeMs || 0) && ms - (l.closeMs || 0) <= 600000) t.rev = 1; };
   const FOCUS = ["Only take second entries (H2/L2).", "Trade only with the trend. No counter-trend trades.", "Wait for the bar to close before every entry.", "Maximum 3 trades, then stop.", "Only fade the edges of a trading range.", "No trades in the first 30 minutes.", "Risk exactly 1R and never move the stop further away."];
-  function challenge() { if (!days.length) return null; const dn = Math.floor(Date.now() / 864e5), i = Math.floor(((dn * 9301 + 49297) % 233280) / 233280 * days.length); return { i, date: days[i].date, focus: FOCUS[dn % 7], done: !!(LSget("bbb_prac", {}).ch || {})[ymd(Date.now())] }; }
+  function challenge() { if (!days.length) return null; const dn = Math.floor(Date.now() / 864e5); let i = Math.floor(((dn * 9301 + 49297) % 233280) / 233280 * days.length); const auto = { d: 1, f: 1 };
+    if (CFG.chD) { const k = days.findIndex(d => d.date >= CFG.chD); if (k >= 0) { i = k; auto.d = 0; } }
+    return { i, date: days[i].date, focus: (CFG.chF && CFG.chF.trim()) || FOCUS[dn % 7], autoD: !!auto.d, autoF: !(CFG.chF && CFG.chF.trim()), done: !!(LSget("bbb_prac", {}).ch || {})[ymd(Date.now())] }; }
   function markPractice(dd) { const c = challenge(); if (c && dd === c.date) { const p = LSget("bbb_prac", {}); p.ch = p.ch || {}; p.ch[ymd(Date.now())] = 1; LSset("bbb_prac", p); } }
   function streak() { const set = new Set(trades.filter(t => t.real).map(t => ymd(t.real)).concat(LSget("bbb_sess", []).map(x => ymd(x.real)))); let n = 0; const d = new Date(); const today = set.has(ymd(d)); if (!today) d.setDate(d.getDate() - 1); while (set.has(ymd(d))) { n++; d.setDate(d.getDate() - 1); } return { n, today }; }
   function worstDay() { const g = {}; trades.filter(t => t.state === "closed" && t.real).forEach(t => { const o = g[t.date] || (g[t.date] = { date: t.date, R: 0, n: 0, real: 0 }); o.R += t.R; o.n++; o.real = Math.max(o.real, t.real); }); return Object.values(g).filter(o => o.R < 0).sort((a, b) => a.R - b.R)[0] || null; }
@@ -2335,11 +2503,15 @@ window.__sim = { get bars() { return bars; }, panels, main, side1, side2, advanc
   }
   function fillPrac() {
     let h = ""; const c = challenge();
-    if (pOn("pd") && c) h += '<div class="pi"><b>Today\'s challenge</b><p>' + c.focus + "</p><small>Session: " + c.date + (c.done ? " (done)" : "") + '</small><br><button id="pcGo">' + (c.done ? "Play it again" : "Start") + "</button></div>";
+    if (pOn("pd") && c) h += '<div class="pi"><b>Today\'s challenge</b><p>' + c.focus + "</p><small>Session: " + c.date + (c.done ? " (done)" : "") + (c.autoD ? " (picked automatically)" : " (your date)") + '</small><br><button id="pcGo">' + (c.done ? "Play it again" : "Start") + '</button>'
+      + '<div class="pr"><input id="pcF" type="text" placeholder="Your own challenge rule" maxlength="90" value="' + (c.autoF ? "" : c.focus.replace(/"/g, "&quot;")) + '"></div>'
+      + '<div class="pr"><input id="pcD" type="date" min="' + days[0].date + '" max="' + days[days.length - 1].date + '" value="' + (c.autoD ? "" : c.date) + '"><button id="pcSave">Save</button><button id="pcAuto">Automatic</button></div></div>';
     if (pOn("ps")) { const s = streak(); h += '<div class="pi"><b>Practice streak</b><p>' + s.n + (s.n === 1 ? " day" : " days") + (s.today ? "" : " (practice today to keep it)") + "</p></div>"; }
     const w = pOn("pw") ? worstDay() : null; if (w && Date.now() - w.real >= 7 * 864e5) h += '<div class="pi"><b>Revisit your worst day</b><p>' + w.date + ": " + w.R.toFixed(2) + " R in " + w.n + ' trades</p><button id="pwGo">Replay it</button></div>';
     if (pOn("pl")) h += '<div class="pi"><b>Daily loss limit</b><p>' + (days[dayIdx] ? dayR(days[dayIdx].date).toFixed(2) : "0.00") + " R today, limit -" + (CFG.pll || 3) + " R" + (window.lossLocked() ? " (session locked)" : "") + "</p></div>";
     prac.innerHTML = h; prac.prepend(modeBox());
+    const sv = prac.querySelector("#pcSave"); if (sv) sv.onclick = () => { CFG.chF = prac.querySelector("#pcF").value.trim(); CFG.chD = prac.querySelector("#pcD").value || ""; saveCfg(); fillPrac(); toast("Challenge saved"); };
+    const au = prac.querySelector("#pcAuto"); if (au) au.onclick = () => { CFG.chF = ""; CFG.chD = ""; saveCfg(); fillPrac(); toast("Challenge is automatic again"); };
     const g = prac.querySelector("#pcGo"); if (g) g.onclick = () => { prac.hidden = true; goDay(challenge().i); };
     const g2 = prac.querySelector("#pwGo"); if (g2) g2.onclick = () => { prac.hidden = true; const x = worstDay(), i = x ? days.findIndex(d => d.date === x.date) : -1; if (i >= 0) goDay(i); };
   }
