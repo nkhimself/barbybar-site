@@ -246,6 +246,19 @@
   #dayFinder .df-close{min-width:32px;width:32px;padding:0;font-size:18px;background:transparent;border:0;color:inherit}
   #dayFinder .df-controls{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end;padding:12px 14px;border-bottom:1px solid var(--line)}
   #dayFinder .df-f2{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #dayFinder .df-c1{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+  #dayFinder .df-c1[hidden]{display:none}
+  #dayFinder .df-f3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) auto}
+  #dayFinder .df-tabs{display:flex;gap:6px;padding:10px 14px 0}
+  #dayFinder .df-tabs button{flex:1;background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:7px;font:600 13px system-ui}
+  #dayFinder .df-tabs button.on{color:#1a1200;background:#F5B642;border-color:#F5B642}
+  #dayFinder .df-spark{width:64px;height:28px;flex:none}
+  #dayFinder .df-pct{font-weight:700;font-size:13px;min-width:42px;text-align:right}
+  #dayFinder .df-flag{background:transparent;border:0;color:var(--muted);font-size:15px;padding:2px 6px;cursor:pointer;flex:none}
+  #dayFinder .df-flag.on{color:#c62828}
+  #dayFinder .df-more{width:100%;margin:6px 0;padding:9px;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:inherit;font:600 13px system-ui;cursor:pointer}
+  #dayFinder .df-foot a{color:#D79A19;margin-left:8px}
+
   #dayFinder .df-field{display:flex;flex-direction:column;gap:4px;min-width:0}
   #dayFinder .df-field label{font-size:11px;color:var(--muted)}
   #dayFinder select,#dayFinder input{width:100%;min-width:0;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 8px;min-height:36px}
@@ -254,8 +267,9 @@
   #dayFinder .df-results{overflow:auto;min-height:100px;padding:5px 9px 10px}
   #dayFinder .df-result{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;margin:3px 0;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg)}
   #dayFinder .df-result:hover{border-color:#F5B642;background:color-mix(in srgb,var(--panel) 86%,#F5B642 14%)}
-  #dayFinder .df-date{width:112px;flex:none;font-weight:700;font-variant-numeric:tabular-nums}
+  #dayFinder .df-date{width:98px;flex:none;font-weight:700;font-variant-numeric:tabular-nums}
   #dayFinder .df-detail{flex:1;min-width:0}
+  #dayFinder .df-primary,#dayFinder .df-secondary{display:block}
   #dayFinder .df-primary{font-weight:600}
   #dayFinder .df-secondary{font-size:11px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
   #dayFinder .df-range{font-size:11px;color:var(--muted);white-space:nowrap}
@@ -320,10 +334,11 @@
 <div id="dayFinder" hidden role="dialog" aria-modal="true" aria-labelledby="dfTitle">
   <section class="df-panel">
     <header class="df-head">
-      <div><b id="dfTitle">Find a day</b><small>Search historical sessions by day structure</small></div>
+      <div><b id="dfTitle">Find a day</b><small>Search 8 years of real sessions by day structure</small></div>
       <button type="button" class="df-close" id="dfClose" aria-label="Close">✕</button>
     </header>
-    <div class="df-controls">
+    <div class="df-tabs"><button type="button" id="dfTabType" class="on">By day type</button><button type="button" id="dfTabLike">Like a day</button></div>
+    <div class="df-controls df-c1" id="dfCtlType">
       <div class="df-field"><label for="dfCategory">Day category</label><select id="dfCategory">
         <option value="1">1 — Trend from the open</option>
         <option value="2">2 — Spike and channel</option>
@@ -333,18 +348,26 @@
         <option value="6">6 — Trading range day</option>
         <option value="7">7 — Stairs / broad channel trend</option>
       </select></div>
-      <div class="df-field"><label for="dfFrom">From</label><input type="date" id="dfFrom"></div>
-      <div class="df-field"><label for="dfTo">To</label><input type="date" id="dfTo"></div>
-      <button type="button" class="df-search" id="dfSearch">Search</button>
+      <div class="df-field"><label for="dfMin">Match strength</label><select id="dfMin"><option value="60">Strong only</option><option value="45" selected>Good or better</option><option value="30">Any possible match</option></select></div>
+    </div>
+    <div class="df-controls df-c1" id="dfCtlLike" hidden>
+      <div class="df-field"><label for="dfRef">Reference day</label><input type="date" id="dfRef"></div>
+      <div class="df-field"><label for="dfMirror">Mirror images</label><select id="dfMirror"><option value="0">Same direction only</option><option value="1">Also bull/bear mirror</option></select></div>
     </div>
     <div class="df-controls df-f2">
-      <div class="df-field"><label for="dfDir">Direction</label><select id="dfDir"><option value="0">Any</option><option value="1">Bull day (closes up)</option><option value="-1">Bear day (closes down)</option></select></div>
+      <div class="df-field"><label for="dfDir">Direction</label><select id="dfDir"><option value="0">Any</option><option value="1">Closes above open</option><option value="-1">Closes below open</option></select></div>
       <div class="df-field"><label for="dfSize">Day range vs ADR</label><select id="dfSize"><option value="">Any</option><option value="s">Small (under 0.8)</option><option value="n">Normal (0.8 to 1.3)</option><option value="l">Large (over 1.3)</option></select></div>
       <div class="df-field"><label for="dfGap">Opening gap</label><select id="dfGap"><option value="">Any</option><option value="u">Gap up (over 0.3 ADR)</option><option value="d">Gap down (over 0.3 ADR)</option><option value="f">Small gap</option></select></div>
     </div>
-    <div class="df-status" id="dfStatus">Choose a category and date range, then search.</div>
+    <div class="df-controls df-f3">
+      <div class="df-field"><label for="dfFrom">From</label><input type="date" id="dfFrom"></div>
+      <div class="df-field"><label for="dfTo">To</label><input type="date" id="dfTo"></div>
+      <div class="df-field"><label for="dfSort">Sort by</label><select id="dfSort"><option value="best">Best match</option><option value="new">Newest first</option><option value="old">Oldest first</option><option value="big">Biggest range</option></select></div>
+      <button type="button" class="df-search" id="dfSearch">Search</button>
+    </div>
+    <div class="df-status" id="dfStatus">Choose a category, then search.</div>
     <div class="df-results" id="dfResults"><div class="df-empty">No search performed yet.</div></div>
-    <div class="df-foot">A category matches when it is the primary label or any additional label. Select a date to load that session into the replay chart.</div>
+    <div class="df-foot" id="dfFoot"><span>Match % shows how closely a day resembles Brooks's own examples of that type. Tap a day to replay it. Tap ⚑ if a label looks wrong.</span> <a href="#" id="dfExport">Copy my wrong-label marks</a></div>
   </section>
 </div>
 
@@ -359,7 +382,7 @@ const DATA_BASE = (() => {
   if (q) return q.endsWith("/") ? q : q + "/";
   return "https://drknygdsfirqaypagosr.supabase.co/storage/v1/object/public/ticks/";
 })();
-const VER = "4.16.0";
+const VER = "4.17.0";
 let LP = null;
 const dOn = (o, p) => (o.pid == null ? panels.indexOf(main) : o.pid) === panels.indexOf(p);
 const vTL = p => p.tl != null ? p.tl : S.showLines !== false, vHI = p => p.hi2 != null ? p.hi2 : S.showHist !== false;
@@ -1800,93 +1823,118 @@ const DAY_TYPE_NAMES = {
   6: "Trading range day",
   7: "Stairs / broad channel trend"
 };
-let dayLabelsData = null, dayLabelsPromise = null, dayFinderInitialised = false;
+let dayLabelsData = null, dayLabelsPromise = null, dayFinderInitialised = false, dfMode = "type", dfHits = [], dfShown = 0;
 function loadDayLabels() {
-  if (Array.isArray(dayLabelsData)) return Promise.resolve(dayLabelsData);
+  if (dayLabelsData) return Promise.resolve(dayLabelsData);
   if (dayLabelsPromise) return dayLabelsPromise;
-  dayLabelsPromise = getJSON(DATA_BASE + "daylabels.json").catch(() => null).then(data => data || fetch("daylabels.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null)).then(data => {
-    if (!Array.isArray(data)) throw new Error("daylabels.json is missing or has an unexpected format");
-    dayLabelsData = data;
-    return data;
-  }).catch(err => { dayLabelsPromise = null; throw err; });
+  dayLabelsPromise = fetch("daylabels.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null)
+    .then(data => data || getJSON(DATA_BASE + "daylabels.json").catch(() => null)).then(data => {
+      const rows = Array.isArray(data) ? data : data && data.rows;
+      if (!Array.isArray(rows)) throw new Error("daylabels.json is missing or has an unexpected format");
+      dayLabelsData = rows; return rows;
+    }).catch(err => { dayLabelsPromise = null; throw err; });
   return dayLabelsPromise;
+}
+function dfScore(row, t) {
+  if (Array.isArray(row.s)) return row.s[t - 1] || 0;
+  return Number(row.p) === t ? 60 : ((row.l || []).map(Number).includes(t) ? 40 : 0);
+}
+function dfWrong() { try { return JSON.parse(localStorage.getItem("bbb_wronglabels") || "{}"); } catch (e) { return {}; } }
+function dfSetTab(m) {
+  dfMode = m; $("dfTabType").classList.toggle("on", m === "type"); $("dfTabLike").classList.toggle("on", m === "like");
+  $("dfCtlType").hidden = m !== "type"; $("dfCtlLike").hidden = m !== "like"; $("dfSort").parentNode.style.display = m === "like" ? "none" : "";
+  $("dfStatus").textContent = m === "type" ? "Choose a category, then search." : "Pick a reference day, then search for days with the same shape.";
+  $("dfResults").innerHTML = '<div class="df-empty">No search performed yet.</div>';
 }
 function openDayFinder() {
   const box = $("dayFinder");
   if (!box) return;
   if (!days.length) { toast("Historical chart data is still loading. Please try again shortly."); return; }
-  if (!dayFinderInitialised && days.length) {
+  if (!dayFinderInitialised) {
     const first = days[0].date, last = days[days.length - 1].date;
-    const dt = new Date(last + "T00:00:00Z");
-    dt.setUTCFullYear(dt.getUTCFullYear() - 1);
-    const yearAgo = dt.toISOString().slice(0, 10);
-    $("dfFrom").min = first; $("dfFrom").max = last;
-    $("dfTo").min = first; $("dfTo").max = last;
-    $("dfFrom").value = yearAgo < first ? first : yearAgo;
-    $("dfTo").value = last;
+    ["dfFrom", "dfTo", "dfRef"].forEach(id => { $(id).min = first; $(id).max = last; });
+    $("dfFrom").value = first; $("dfTo").value = last;
     dayFinderInitialised = true;
   }
-  box.hidden = false;
-  $("dfStatus").textContent = "Choose a category and date range, then search.";
-  $("dfResults").innerHTML = '<div class="df-empty">Loading day labels when you search.</div>';
-  $("dfCategory").focus();
+  if (days[dayIdx]) $("dfRef").value = days[dayIdx].date;
+  box.hidden = false; $("dfCategory").focus();
 }
 function closeDayFinder() { const box = $("dayFinder"); if (box) box.hidden = true; }
+function dfSpark(row) {
+  const sh = row.sh; if (!sh) return "";
+  const pts = sh.map((v, i) => (i * 64 / (sh.length - 1)).toFixed(1) + "," + (26 - v * 0.24).toFixed(1)).join(" ");
+  const up = (row.f && row.f.ret || 0) >= 0;
+  return '<svg class="df-spark" viewBox="0 0 64 28"><polyline fill="none" stroke="' + (up ? "#2EC4A6" : "#E4572E") + '" stroke-width="1.6" stroke-linejoin="round" points="' + pts + '"/></svg>';
+}
+function dfRender(append) {
+  const results = $("dfResults"); if (!append) { results.innerHTML = ""; dfShown = 0; }
+  const old = results.querySelector(".df-more"); if (old) old.remove();
+  const wrong = dfWrong(), frag = document.createDocumentFragment();
+  dfHits.slice(dfShown, dfShown + 30).forEach(h => {
+    const row = h.row, f = row.f || {}, b = document.createElement("div"); b.className = "df-result"; b.setAttribute("role", "button"); b.tabIndex = 0;
+    const p = Number(row.p), others = (row.l || []).map(Number).filter(n => n !== p);
+    const top = dfMode === "type" ? Number($("dfCategory").value) : p;
+    const nm = DAY_TYPE_NAMES[top] || "Unclear day";
+    const dd = daily[row.d], rng = dd && Number.isFinite(dd[1]) && Number.isFinite(dd[2]) ? ((dd[1] - dd[2]) / 1000).toFixed(0) + " pts" : "";
+    b.innerHTML = dfSpark(row) + '<span class="df-date">' + row.d + '</span><span class="df-detail"><span class="df-primary">' + (dfMode === "type" ? nm : (DAY_TYPE_NAMES[p] || "Unclear day")) + '</span><span class="df-secondary">' +
+      (p && p !== top ? "Mostly: " + DAY_TYPE_NAMES[p] + " · " : "") + (others.length ? "Also: " + others.map(n => DAY_TYPE_NAMES[n]).join(" · ") : "") + '</span></span><span class="df-range">' + rng +
+      (f.rng != null ? "<br>" + f.rng.toFixed(1) + "× ADR" : "") + '</span><span class="df-pct">' + h.pct + '%</span>';
+    const flag = document.createElement("button"); flag.type = "button"; flag.className = "df-flag" + (wrong[row.d] ? " on" : ""); flag.textContent = "⚑"; flag.title = "This label looks wrong";
+    flag.addEventListener("click", e => { e.stopPropagation(); const w = dfWrong(); if (w[row.d]) delete w[row.d]; else w[row.d] = { shown: dfMode === "type" ? Number($("dfCategory").value) : null, primary: row.p, conf: row.c }; try { localStorage.setItem("bbb_wronglabels", JSON.stringify(w)); } catch (er) { /* ignore */ } flag.classList.toggle("on"); });
+    b.appendChild(flag);
+    const go = () => { const i = dayOf[row.d]; if (i == null) { toast("This date is not available in the replay data."); return; } closeDayFinder(); goDay(i); };
+    b.addEventListener("click", go); b.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+    frag.appendChild(b);
+  });
+  dfShown += 30; results.appendChild(frag);
+  if (dfShown < dfHits.length) { const m = document.createElement("button"); m.type = "button"; m.className = "df-more"; m.textContent = "Show more (" + (dfHits.length - dfShown) + " left)"; m.addEventListener("click", () => dfRender(true)); results.appendChild(m); }
+}
 function runDayFinderSearch() {
-  const from = $("dfFrom").value, to = $("dfTo").value, type = Number($("dfCategory").value);
-  const status = $("dfStatus"), results = $("dfResults");
+  const from = $("dfFrom").value, to = $("dfTo").value, status = $("dfStatus"), results = $("dfResults");
   if (!from || !to) { status.textContent = "Choose both start and end dates."; return; }
   if (from > to) { status.textContent = "The start date must be on or before the end date."; return; }
-  status.textContent = "Loading historical labels…";
-  results.innerHTML = "";
+  status.textContent = "Loading historical labels…"; results.innerHTML = "";
   loadDayLabels().then(labels => {
-    const hits = labels.filter(row => {
-      if (!row || typeof row.d !== "string" || row.d < from || row.d > to) return false;
-      if (dayOf[row.d] == null) return false; // only offer dates Baarina can replay
-      const all = Array.isArray(row.l) ? row.l.map(Number) : [];
-      if (row.p != null) all.push(Number(row.p));
-      if (!all.includes(type)) return false;
-      const f = row.f || {}, dir = Number($("dfDir").value), sz = $("dfSize").value, gp = $("dfGap").value;
+    const dir = Number($("dfDir").value), sz = $("dfSize").value, gp = $("dfGap").value, ok = row => {
+      if (!row || typeof row.d !== "string" || row.d < from || row.d > to || dayOf[row.d] == null) return false;
+      const f = row.f || {};
       if (dir && f.dir !== dir) return false;
       if (sz && !(sz === "s" ? f.rng < 0.8 : sz === "n" ? f.rng >= 0.8 && f.rng <= 1.3 : f.rng > 1.3)) return false;
       if (gp && !(gp === "u" ? f.gap > 0.3 : gp === "d" ? f.gap < -0.3 : Math.abs(f.gap) <= 0.3)) return false;
       return true;
-    }).sort((a, b) => b.d.localeCompare(a.d));
-    status.textContent = hits.length + " matching session" + (hits.length === 1 ? "" : "s") + " · " + DAY_TYPE_NAMES[type] + " · " + from + " to " + to;
-    if (!hits.length) {
-      results.innerHTML = '<div class="df-empty">No matching replayable sessions in this date range.</div>';
-      return;
-    }
-    const frag = document.createDocumentFragment();
-    hits.forEach(row => {
-      const b = document.createElement("button"); b.type = "button"; b.className = "df-result";
-      const dt = document.createElement("span"); dt.className = "df-date"; dt.textContent = row.d;
-      const detail = document.createElement("span"); detail.className = "df-detail";
-      const primary = document.createElement("span"); primary.className = "df-primary";
-      const p = Number(row.p); primary.textContent = "Primary: " + (DAY_TYPE_NAMES[p] || ("Type " + p));
-      const secondary = document.createElement("span"); secondary.className = "df-secondary";
-      const extra = (Array.isArray(row.l) ? row.l.map(Number) : []).filter(n => n !== p).map(n => DAY_TYPE_NAMES[n] || ("Type " + n));
-      secondary.textContent = extra.length ? "Also: " + extra.join(" · ") : "No additional category";
-      detail.append(primary, secondary);
-      const dd = daily[row.d];
-      const range = document.createElement("span"); range.className = "df-range";
-      range.textContent = dd && Number.isFinite(dd[1]) && Number.isFinite(dd[2]) ? ((dd[1] - dd[2]) / 1000).toFixed(2) + " pts" : "";
-      const arrow = document.createElement("span"); arrow.className = "df-open"; arrow.textContent = "›";
-      b.append(dt, detail, range, arrow);
-      b.addEventListener("click", () => {
-        const i = dayOf[row.d];
-        if (i == null) { toast("This date is not available in the replay data."); return; }
-        closeDayFinder();
-        goDay(i);
+    };
+    let msg;
+    if (dfMode === "type") {
+      const type = Number($("dfCategory").value), min = Number($("dfMin").value);
+      dfHits = labels.filter(r => ok(r) && dfScore(r, type) >= min).map(r => ({ row: r, pct: dfScore(r, type) }));
+      const so = $("dfSort").value;
+      dfHits.sort(so === "new" ? (a, b) => b.row.d.localeCompare(a.row.d) : so === "old" ? (a, b) => a.row.d.localeCompare(b.row.d) :
+        so === "big" ? (a, b) => (b.row.f.rng || 0) - (a.row.f.rng || 0) : (a, b) => b.pct - a.pct || b.row.d.localeCompare(a.row.d));
+      msg = dfHits.length + " matching session" + (dfHits.length === 1 ? "" : "s") + " · " + DAY_TYPE_NAMES[type] + (type === 3 || type === 5 ? " (this type is the least reliable one)" : type === 2 || type === 7 ? " (rule-based, not yet checked against examples)" : "");
+    } else {
+      const ref = labels.find(r => r.d === $("dfRef").value);
+      if (!ref || !ref.sh) { status.textContent = "That date has no shape data (it is a holiday, a half day or one of the first 10 days). Pick another day."; return; }
+      const mir = $("dfMirror").value === "1", sh = ref.sh;
+      dfHits = [];
+      labels.forEach(r => {
+        if (r === ref || !r.sh || !ok(r)) return;
+        let d1 = 0, d2 = 0; for (let i = 0; i < sh.length; i++) { d1 += Math.abs(sh[i] - r.sh[i]); if (mir) d2 += Math.abs(sh[i] - (100 - r.sh[i])); }
+        const d = (mir ? Math.min(d1, d2) : d1) / sh.length;
+        dfHits.push({ row: r, pct: Math.max(0, Math.round(100 - 2.5 * d)), d });
       });
-      frag.appendChild(b);
-    });
-    results.appendChild(frag);
+      dfHits.sort((a, b) => a.d - b.d); dfHits = dfHits.slice(0, 60);
+      msg = "Closest days to " + ref.d + " by shape of the day";
+    }
+    status.textContent = msg;
+    if (!dfHits.length) { results.innerHTML = '<div class="df-empty">No matching replayable sessions. Try "Any possible match" or a wider date range.</div>'; return; }
+    dfRender(false);
   }).catch(err => {
     status.textContent = "Could not load day labels: " + err.message;
-    results.innerHTML = '<div class="df-empty">Put daylabels.json in the app folder next to index.html (or in the public data folder with index.json), then try again.</div>';
+    results.innerHTML = '<div class="df-empty">Put daylabels.json in the app folder next to index.html, then try again.</div>';
   });
 }
+$("dfTabType").addEventListener("click", () => dfSetTab("type")); $("dfTabLike").addEventListener("click", () => dfSetTab("like"));
+$("dfExport").addEventListener("click", e => { e.preventDefault(); const t = JSON.stringify(dfWrong(), null, 1); (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast("Wrong-label marks copied"), () => prompt("Copy this:", t)); });
 $("dfClose").addEventListener("click", closeDayFinder);
 $("dfSearch").addEventListener("click", runDayFinderSearch);
 $("dayFinder").addEventListener("click", e => { if (e.target === $("dayFinder")) closeDayFinder(); });
