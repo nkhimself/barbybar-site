@@ -1827,10 +1827,10 @@ let dayLabelsData = null, dayLabelsPromise = null, dayFinderInitialised = false,
 function loadDayLabels() {
   if (dayLabelsData) return Promise.resolve(dayLabelsData);
   if (dayLabelsPromise) return dayLabelsPromise;
-  dayLabelsPromise = fetch("daylabels.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null)
-    .then(data => data || getJSON(DATA_BASE + "daylabels.json").catch(() => null)).then(data => {
-      const rows = Array.isArray(data) ? data : data && data.rows;
-      if (!Array.isArray(rows)) throw new Error("daylabels.json is missing or has an unexpected format");
+  const rowsOf = d => { const r = Array.isArray(d) ? d : d && d.rows; return Array.isArray(r) && r.length && r[0] && r[0].d ? r : null; };
+  dayLabelsPromise = fetch("daylabels.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null).then(d => rowsOf(d) ||
+    getJSON(DATA_BASE + "daylabels.json").then(rowsOf).catch(() => null)).then(rows => {
+      if (!rows) throw new Error("daylabels.json is missing or has an unexpected format");
       dayLabelsData = rows; return rows;
     }).catch(err => { dayLabelsPromise = null; throw err; });
   return dayLabelsPromise;
